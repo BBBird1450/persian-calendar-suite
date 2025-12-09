@@ -1,0 +1,8 @@
+demo/
+src/
+.babelrc
+rollup.config.js
+.gitignore
+*.log
+node_modules/
+.git/

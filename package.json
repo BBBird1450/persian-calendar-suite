@@ -1,0 +1,58 @@
+{
+  "name": "persian-calendar-suite",
+  "version": "1.0.2",
+  "description": "Complete Persian (Jalali/Shamsi) calendar suite for React with datepicker, range picker, and event calendar",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "persian",
+    "jalali",
+    "shamsi",
+    "datepicker",
+    "calendar",
+    "react",
+    "date-range-picker",
+    "datetime-picker",
+    "event-calendar",
+    "persian-calendar",
+    "jalali-calendar",
+    "shamsi-calendar",
+    "iran",
+    "farsi",
+    "nextjs",
+    "react-component"
+  ],
+  "author": "BBBird1450 <BBBird1450@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BBBird1450/persian-calendar-suite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BBBird1450/persian-calendar-suite/issues"
+  },
+  "homepage": "https://github.com/BBBird1450/persian-calendar-suite#readme",
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "rollup": "^4.9.6",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "@babel/core": "^7.23.7",
+    "@babel/preset-react": "^7.23.3"
+  }
+}
