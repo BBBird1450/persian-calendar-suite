@@ -323,7 +323,7 @@ export default function PersianDateTimePicker({
   };
 
   const displayValue = selectedDay 
-    ? `${selectedDay.year}/${String(selectedDay.month).padStart(2, '0')}/${String(selectedDay.day).padStart(2, '0')}`
+    ? `${selectedDay.year}/${String(selectedDay.month).padStart(2, '0')}/${String(selectedDay.day).padStart(2, '0')}${showTime ? ` ${timeStr}` : ''}`
     : '';
 
   return (
