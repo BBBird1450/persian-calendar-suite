@@ -76,9 +76,22 @@ export default function PersianDateTimePicker({
         }, 200);
       }
     };
+    const handleScroll = () => {
+      if (showCalendar) {
+        setIsClosing(true);
+        setTimeout(() => {
+          setShowCalendar(false);
+          setIsClosing(false);
+        }, 200);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [showCalendar]);
 
   useEffect(() => {
     if (selectedDay && timeStr) {
@@ -334,7 +347,7 @@ export default function PersianDateTimePicker({
           onClick={() => setShowCalendar(!showCalendar)}
           placeholder="تاریخ را انتخاب کنید"
           readOnly
-          style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
+          style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', direction: 'rtl' }}
         />
         {showCalendar && (
           <div

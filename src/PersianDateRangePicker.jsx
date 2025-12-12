@@ -78,9 +78,22 @@ const PersianDateRangePicker = ({
         }, 200);
       }
     };
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsClosing(true);
+        setTimeout(() => {
+          setIsOpen(false);
+          setIsClosing(false);
+        }, 200);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (startDate && endDate) {
@@ -458,7 +471,7 @@ const PersianDateRangePicker = ({
         placeholder={`${placeholder[0]} ~ ${placeholder[1]}`}
         readOnly
         disabled={disabled}
-        style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, fontFamily: 'inherit', transition: 'all 0.2s' }}
+        style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, fontFamily: 'inherit', transition: 'all 0.2s', direction: 'rtl' }}
       />
 
       {isOpen && (
