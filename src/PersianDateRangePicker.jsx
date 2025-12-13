@@ -314,7 +314,6 @@ const PersianDateRangePicker = ({
         cursor: 'pointer',
         border: `1px solid ${defaultTheme.borderColor}`,
         fontSize: '14px',
-        transition: 'all 0.2s',
         color: defaultTheme.textColor,
         transition: 'all 0.2s'
       };

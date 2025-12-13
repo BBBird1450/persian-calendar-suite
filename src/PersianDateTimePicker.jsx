@@ -11,7 +11,9 @@ export default function PersianDateTimePicker({
   minuteStep = 1,
   theme = {},
   outputFormat = 'iso',
-  showFooter = true
+  showFooter = true,
+  minDate = null,
+  maxDate = null
 }) {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -99,7 +101,27 @@ export default function PersianDateTimePicker({
     }
   }, [outputFormat]);
 
+  const isDateDisabled = (year, month, day) => {
+    const gDate = jalaliToGregorian(year, month, day);
+    const dateStr = `${gDate.gy}-${String(gDate.gm).padStart(2, '0')}-${String(gDate.gd).padStart(2, '0')}`;
+    
+    if (minDate) {
+      const minDateObj = new Date(minDate);
+      const minDateStr = `${minDateObj.getFullYear()}-${String(minDateObj.getMonth() + 1).padStart(2, '0')}-${String(minDateObj.getDate()).padStart(2, '0')}`;
+      if (dateStr < minDateStr) return true;
+    }
+    
+    if (maxDate) {
+      const maxDateObj = new Date(maxDate);
+      const maxDateStr = `${maxDateObj.getFullYear()}-${String(maxDateObj.getMonth() + 1).padStart(2, '0')}-${String(maxDateObj.getDate()).padStart(2, '0')}`;
+      if (dateStr > maxDateStr) return true;
+    }
+    
+    return false;
+  };
+
   const handleDateSelect = (day) => {
+    if (isDateDisabled(displayMonth.year, displayMonth.month, day)) return;
     const newDate = { year: displayMonth.year, month: displayMonth.month, day };
     setSelectedDay(newDate);
     updateValue(newDate, timeStr);
@@ -216,6 +238,7 @@ export default function PersianDateTimePicker({
                         selectedDay.month === displayMonth.month && selectedDay.day === day;
       const isToday = today && today.year === displayMonth.year && 
                       today.month === displayMonth.month && today.day === day;
+      const isDisabled = isDateDisabled(displayMonth.year, displayMonth.month, day);
       days.push(
         <div
           key={day}
@@ -226,17 +249,18 @@ export default function PersianDateTimePicker({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
             borderRadius: defaultTheme.circularDates ? '50%' : '4px',
             border: `1px solid ${defaultTheme.borderColor}`,
             backgroundColor: isSelected ? defaultTheme.primaryColor : isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent',
-            color: isSelected ? defaultTheme.selectedTextColor : defaultTheme.textColor,
+            color: isDisabled ? '#ccc' : isSelected ? defaultTheme.selectedTextColor : defaultTheme.textColor,
             fontWeight: isSelected ? 'bold' : 'normal',
             fontSize: '14px',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            opacity: isDisabled ? 0.3 : 1
           }}
-          onMouseEnter={(e) => !isSelected && (e.target.style.backgroundColor = defaultTheme.hoverColor)}
-          onMouseLeave={(e) => !isSelected && (e.target.style.backgroundColor = isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent')}
+          onMouseEnter={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = defaultTheme.hoverColor)}
+          onMouseLeave={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent')}
         >
           {day}
         </div>

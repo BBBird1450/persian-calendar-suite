@@ -1,0 +1,188 @@
+import { useState, useRef, useEffect } from 'react';
+
+const PersianTimePicker = ({ 
+  value = '', 
+  onChange, 
+  theme = {},
+  minuteStep = 1,
+  disabledHours = [],
+  placeholder = 'انتخاب زمان',
+  defaultValue = null
+}) => {
+  const defaultTheme = {
+    primaryColor: '#1890ff',
+    backgroundColor: '#ffffff',
+    borderColor: '#e8e8e8',
+    textColor: '#000000',
+    hoverColor: '#f0f0f0',
+    ...theme
+  };
+
+  const [showDropdown, setShowDropdown] = useState(false);
+  const getInitialTime = () => {
+    if (value) return { hour: parseInt(value.split(':')[0]), minute: parseInt(value.split(':')[1]) };
+    if (defaultValue === 'now') {
+      const now = new Date();
+      return { hour: now.getHours(), minute: now.getMinutes() };
+    }
+    if (defaultValue && defaultValue.includes(':')) {
+      return { hour: parseInt(defaultValue.split(':')[0]), minute: parseInt(defaultValue.split(':')[1]) };
+    }
+    return { hour: 0, minute: 0 };
+  };
+  
+  const initialTime = getInitialTime();
+  const [selectedHour, setSelectedHour] = useState(initialTime.hour);
+  const [selectedMinute, setSelectedMinute] = useState(initialTime.minute);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, true);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, []);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i).filter(h => !disabledHours.includes(h));
+  const minutes = Array.from({ length: 60 / minuteStep }, (_, i) => i * minuteStep);
+
+  const handleTimeSelect = (hour, minute) => {
+    setSelectedHour(hour);
+    setSelectedMinute(minute);
+    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    onChange?.(timeStr);
+    setShowDropdown(false);
+  };
+
+  const displayValue = value || '';
+
+  return (
+    <div style={{ position: 'relative', width: '100%' }} ref={dropdownRef}>
+      <input
+        type="text"
+        value={displayValue}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (/^\d{0,2}:?\d{0,2}$/.test(val)) {
+            if (val.includes(':') && val.length === 5) {
+              const [h, m] = val.split(':');
+              if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                setSelectedHour(parseInt(h));
+                setSelectedMinute(parseInt(m));
+                onChange?.(val);
+              }
+            } else {
+              onChange?.(val);
+            }
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && displayValue.includes(':')) {
+            setShowDropdown(false);
+          }
+        }}
+        onClick={() => setShowDropdown(!showDropdown)}
+        style={{
+          width: '100%',
+          padding: '10px 12px',
+          border: `2px solid ${showDropdown ? defaultTheme.primaryColor : defaultTheme.borderColor}`,
+          borderRadius: '8px',
+          fontSize: '14px',
+          cursor: 'text',
+          background: defaultTheme.backgroundColor,
+          color: defaultTheme.textColor,
+          outline: 'none',
+          transition: 'all 0.2s',
+          direction: 'ltr',
+          textAlign: 'center'
+        }}
+      />
+
+      {showDropdown && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          background: defaultTheme.backgroundColor,
+          border: `2px solid ${defaultTheme.primaryColor}`,
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          marginTop: '4px',
+          maxHeight: '200px',
+          overflow: 'hidden'
+        }}>
+          <div style={{ display: 'flex', height: '200px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
+              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>ساعت</div>
+              {hours.map(hour => (
+                <div
+                  key={hour}
+                  onClick={() => handleTimeSelect(hour, selectedMinute)}
+                  style={{
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    background: selectedHour === hour ? defaultTheme.primaryColor : 'transparent',
+                    color: selectedHour === hour ? '#fff' : defaultTheme.textColor,
+                    textAlign: 'center',
+                    fontSize: '12px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedHour !== hour) e.currentTarget.style.background = defaultTheme.hoverColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedHour !== hour) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  {String(hour).padStart(2, '0')}
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>دقیقه</div>
+              {minutes.map(minute => (
+                <div
+                  key={minute}
+                  onClick={() => handleTimeSelect(selectedHour, minute)}
+                  style={{
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    background: selectedMinute === minute ? defaultTheme.primaryColor : 'transparent',
+                    color: selectedMinute === minute ? '#fff' : defaultTheme.textColor,
+                    textAlign: 'center',
+                    fontSize: '12px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedMinute !== minute) e.currentTarget.style.background = defaultTheme.hoverColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedMinute !== minute) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  {String(minute).padStart(2, '0')}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PersianTimePicker;

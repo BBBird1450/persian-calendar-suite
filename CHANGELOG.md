@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-12-13
+
+### Added
+- PersianTimePicker component as standalone time selector
+- Default time support for PersianTimePicker (accepts 'now' or 'HH:MM' format)
+- Date restrictions for PersianDateTimePicker (minDate/maxDate props)
+- Manual time typing support in PersianTimePicker with HH:MM validation
+- Event modal animations (smooth open/close with fade and slide effects)
+- Event add/delete animations with scale effects
+- Close button (×) in event modal header
+- Read-only events support (events with readOnly: true cannot be edited)
+- Persian date pickers in event modal instead of HTML5 date inputs
+
+### Fixed
+- Calendar header date format now shows Persian format (year month day)
+- Added day name (like "سه شنبه") to day view header
+- Swapped navigation button placement (بعدی left, قبلی right)
+
+## [1.0.4] - 2024-12-12
+
+### Added
+- Recurring events (daily, weekly, monthly, yearly)
+- All-day events with special styling
+- Multi-day events spanning across dates
+- Today button for quick navigation
+- Event tooltips on hover with details
+
 ## [1.0.3] - 2024-12-12
 
 ### Fixed
@@ -24,5 +51,5 @@ All notable changes to this project will be documented in this file.
 - Disabled hours support
 - Footer show/hide option
 - Circular date cells option
-- React 16.8+, 17.x, 18.x compatibility
-- Next.js 12.x, 13.x, 14.x support
+- React +16.8 compatibility
+- Next.js +12 support

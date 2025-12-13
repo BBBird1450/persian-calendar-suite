@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import PersianDateTimePicker from './PersianDateTimePicker.jsx';
+import PersianTimePicker from './PersianTimePicker.jsx';
 
 const PersianCalendar = ({ 
   events = [],
@@ -30,9 +32,12 @@ const PersianCalendar = ({
   const [currentWeek, setCurrentWeek] = useState(0);
 
   const [showEventModal, setShowEventModal] = useState(false);
-  const [eventForm, setEventForm] = useState({ title: '', startTime: '', endTime: '', color: defaultTheme.primaryColor, description: '' });
+  const [modalClosing, setModalClosing] = useState(false);
+  const [eventForm, setEventForm] = useState({ title: '', startTime: '', endTime: '', color: defaultTheme.primaryColor, description: '', isAllDay: false, isRecurring: false, recurringType: 'daily', recurringEnd: '', isMultiDay: false, endDate: '' });
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [showRecurringEndPicker, setShowRecurringEndPicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
   const weekDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
@@ -120,7 +125,7 @@ const PersianCalendar = ({
     const greg = jalaliToGregorian(year, month, day);
     const dateStr = `${greg.gy}-${String(greg.gm).padStart(2, '0')}-${String(greg.gd).padStart(2, '0')}`;
     setSelectedSlot({ date: dateStr, hour, year, month, day });
-    setEventForm({ title: '', startTime: `${String(hour).padStart(2, '0')}:00`, endTime: `${String(hour + 1).padStart(2, '0')}:00`, color: defaultTheme.primaryColor, description: '' });
+    setEventForm({ title: '', startTime: `${String(hour).padStart(2, '0')}:00`, endTime: `${String(hour + 1).padStart(2, '0')}:00`, color: defaultTheme.primaryColor, description: '', isAllDay: false, isRecurring: false, recurringType: 'daily', recurringEnd: '', isMultiDay: false, endDate: '' });
     setEditingEvent(null);
     setShowEventModal(true);
   };
@@ -131,7 +136,7 @@ const PersianCalendar = ({
       onEventClick?.(event);
       return;
     }
-    if (!editable) {
+    if (!editable || event.readOnly) {
       onEventClick?.(event);
       return;
     }
@@ -141,7 +146,13 @@ const PersianCalendar = ({
       startTime: event.startTime || event.time || '00:00', 
       endTime: event.endTime || '01:00', 
       color: event.color || defaultTheme.primaryColor, 
-      description: event.description || '' 
+      description: event.description || '',
+      isAllDay: event.isAllDay || false,
+      isRecurring: event.isRecurring || false,
+      recurringType: event.recurringType || 'daily',
+      recurringEnd: event.recurringEnd || '',
+      isMultiDay: event.isMultiDay || false,
+      endDate: event.endDate || ''
     });
     setShowEventModal(true);
   };
@@ -162,17 +173,24 @@ const PersianCalendar = ({
       onEventCreate?.(eventData);
     }
     
-    setShowEventModal(false);
-    setEventForm({ title: '', startTime: '', endTime: '', color: defaultTheme.primaryColor, description: '' });
-    setEditingEvent(null);
+    closeModal();
   };
 
   const handleDeleteEvent = () => {
     if (editingEvent) {
       onEventDelete?.(editingEvent);
-      setShowEventModal(false);
-      setEditingEvent(null);
+      closeModal();
     }
+  };
+
+  const closeModal = () => {
+    setModalClosing(true);
+    setTimeout(() => {
+      setShowEventModal(false);
+      setModalClosing(false);
+      setEventForm({ title: '', startTime: '', endTime: '', color: defaultTheme.primaryColor, description: '', isAllDay: false, isRecurring: false, recurringType: 'daily', recurringEnd: '', isMultiDay: false, endDate: '' });
+      setEditingEvent(null);
+    }, 200);
   };
 
   const getOverlappingEvents = (year, month, day, hour) => {
@@ -244,7 +262,10 @@ const PersianCalendar = ({
 
   const getNavigationText = () => {
     if (viewMode === 'day') {
-      return `${currentDay} ${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
+      const greg = jalaliToGregorian(displayMonth.year, displayMonth.month, currentDay);
+      const date = new Date(greg.gy, greg.gm - 1, greg.gd);
+      const dayOfWeek = (date.getDay() + 1) % 7;
+      return `${weekDays[dayOfWeek]} ${currentDay} ${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
     } else if (viewMode === 'week') {
       return `هفته ${currentWeek + 1} از ${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
     }
@@ -284,10 +305,11 @@ const PersianCalendar = ({
             <div
               key={i}
               onClick={(e) => handleEventClick(event, e)}
+              title={`${event.title}${event.description ? ' - ' + event.description : ''}${event.isAllDay ? ' (تمام روز)' : ''}${event.isRecurring ? ' (تکراری)' : ''}`}
               style={{
-                background: event.color || defaultTheme.primaryColor,
+                background: event.isAllDay ? `linear-gradient(45deg, ${event.color || defaultTheme.primaryColor}, ${event.color || defaultTheme.primaryColor}aa)` : event.color || defaultTheme.primaryColor,
                 color: '#fff',
-                padding: '4px 6px',
+                padding: event.isAllDay ? '6px 8px' : '4px 6px',
                 marginBottom: '4px',
                 borderRadius: defaultTheme.eventRadius,
                 fontSize: '11px',
@@ -296,7 +318,10 @@ const PersianCalendar = ({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 transition: 'all 0.2s',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                border: event.isAllDay ? '2px dashed rgba(255,255,255,0.5)' : 'none',
+                fontWeight: event.isAllDay ? 'bold' : 'normal',
+                animation: event.isNew ? 'eventAdd 0.3s ease-out' : event.isDeleting ? 'eventRemove 0.3s ease-out' : 'none'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-1px)';
@@ -307,7 +332,7 @@ const PersianCalendar = ({
                 e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
               }}
             >
-              {event.time && `${event.time} `}{event.title}
+              {event.isAllDay ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '4px'}}><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> : event.time && `${event.time} `}{event.title}{event.isRecurring ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginLeft: '4px'}}><path d="M4 12a8 8 0 0 1 8-8V2.5L16 6l-4 3.5V8a6 6 0 1 0 6 6h1.5a7.5 7.5 0 1 1-7.5-7.5z"/></svg> : ''}
             </div>
           ))}
         </div>
@@ -366,16 +391,19 @@ const PersianCalendar = ({
                       <div
                         key={i}
                         onClick={(e) => handleEventClick(event, e)}
+                        title={`${event.title}${event.description ? ' - ' + event.description : ''}${event.isAllDay ? ' (تمام روز)' : ''}${event.isRecurring ? ' (تکراری)' : ''}`}
                         style={{
-                          background: event.color || defaultTheme.primaryColor,
+                          background: event.isAllDay ? `linear-gradient(45deg, ${event.color || defaultTheme.primaryColor}, ${event.color || defaultTheme.primaryColor}aa)` : event.color || defaultTheme.primaryColor,
                           color: '#fff',
-                          padding: '6px',
+                          padding: event.isAllDay ? '8px' : '6px',
                           marginBottom: '2px',
                           borderRadius: defaultTheme.eventRadius,
                           fontSize: '11px',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                          border: event.isAllDay ? '2px dashed rgba(255,255,255,0.5)' : 'none',
+                          fontWeight: event.isAllDay ? 'bold' : 'normal'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'scale(1.02)';
@@ -386,7 +414,7 @@ const PersianCalendar = ({
                           e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
                         }}
                       >
-                        {event.title}
+                        {event.isAllDay ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '4px'}}><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> : ''}{event.title}{event.isRecurring ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginLeft: '4px'}}><path d="M4 12a8 8 0 0 1 8-8V2.5L16 6l-4 3.5V8a6 6 0 1 0 6 6h1.5a7.5 7.5 0 1 1-7.5-7.5z"/></svg> : ''}
                       </div>
                     ))}
                   </div>
@@ -427,8 +455,9 @@ const PersianCalendar = ({
                     <div
                       key={i}
                       onClick={(e) => handleEventClick(event, e)}
+                      title={`${event.title}${event.description ? ' - ' + event.description : ''}${event.isAllDay ? ' (تمام روز)' : ''}${event.isRecurring ? ' (تکراری)' : ''}`}
                       style={{
-                        background: event.color || defaultTheme.primaryColor,
+                        background: event.isAllDay ? `linear-gradient(45deg, ${event.color || defaultTheme.primaryColor}, ${event.color || defaultTheme.primaryColor}aa)` : event.color || defaultTheme.primaryColor,
                         color: '#fff',
                         padding: '12px',
                         borderRadius: defaultTheme.eventRadius,
@@ -437,7 +466,7 @@ const PersianCalendar = ({
                         boxShadow: defaultTheme.shadow,
                         flex: hasOverlap ? `0 0 calc(${100 / overlappingEvents.length}% - 4px)` : '1',
                         minWidth: hasOverlap ? '120px' : 'auto',
-                        border: event.isHoliday ? 'none' : '2px solid rgba(255,255,255,0.3)'
+                        border: event.isHoliday ? 'none' : event.isAllDay ? '3px dashed rgba(255,255,255,0.7)' : '2px solid rgba(255,255,255,0.3)'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-2px)';
@@ -448,8 +477,8 @@ const PersianCalendar = ({
                         e.currentTarget.style.boxShadow = defaultTheme.shadow;
                       }}
                     >
-                      <div style={{ fontWeight: 'bold', fontSize: '13px' }}>{event.startTime || event.time} - {event.endTime || ''}</div>
-                      <div style={{ marginTop: '4px' }}>{event.title}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '13px' }}>{event.isAllDay ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '4px'}}><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>تمام روز</> : `${event.startTime || event.time} - ${event.endTime || ''}`}</div>
+                      <div style={{ marginTop: '4px' }}>{event.title}{event.isRecurring ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{marginLeft: '4px'}}><path d="M4 12a8 8 0 0 1 8-8V2.5L16 6l-4 3.5V8a6 6 0 1 0 6 6h1.5a7.5 7.5 0 1 1-7.5-7.5z"/></svg> : ''}</div>
                       {event.description && <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.9 }}>{event.description}</div>}
                     </div>
                   ))}
@@ -466,14 +495,25 @@ const PersianCalendar = ({
     <div style={{ background: defaultTheme.backgroundColor, borderRadius: '12px', overflow: 'hidden', border: `1px solid ${defaultTheme.borderColor}`, boxShadow: defaultTheme.shadow, position: 'relative' }}>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+        @keyframes eventAdd { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes eventRemove { from { transform: scale(1); opacity: 1; } to { transform: scale(0.8); opacity: 0; } }
       `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: defaultTheme.headerBg, borderBottom: `2px solid ${defaultTheme.borderColor}` }}>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => handleNavigation(-1)} style={{ padding: '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>قبلی</button>
           <button onClick={() => handleNavigation(1)} style={{ padding: '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>بعدی</button>
+          <button onClick={() => {
+            const today = new Date();
+            const jalali = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            setDisplayMonth({ year: jalali.jy, month: jalali.jm });
+            setCurrentDay(jalali.jd);
+            setCurrentWeek(0);
+          }} style={{ padding: '8px 16px', border: `1px solid ${defaultTheme.primaryColor}`, borderRadius: '6px', background: defaultTheme.primaryColor, color: '#fff', cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>امروز</button>
+          <button onClick={() => handleNavigation(-1)} style={{ padding: '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>قبلی</button>
         </div>
-        <div style={{ fontWeight: 'bold', fontSize: '20px', color: defaultTheme.textColor }}>
+        <div style={{ fontWeight: 'bold', fontSize: '20px', color: defaultTheme.textColor, direction: 'rtl' }}>
           {getNavigationText()}
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
@@ -499,9 +539,12 @@ const PersianCalendar = ({
       {viewMode === 'day' && renderDayView()}
 
       {showEventModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: 'fadeIn 0.2s' }} onClick={() => setShowEventModal(false)}>
-          <div style={{ background: defaultTheme.backgroundColor, borderRadius: '12px', padding: '24px', width: '90%', maxWidth: '500px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', animation: 'slideIn 0.3s', direction: 'rtl' }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: 'bold' }}>{editingEvent ? 'ویرایش رویداد' : 'رویداد جدید'}</h3>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: modalClosing ? 'fadeOut 0.2s' : 'fadeIn 0.2s' }} onClick={closeModal}>
+          <div style={{ background: defaultTheme.backgroundColor, borderRadius: '12px', padding: '24px', width: '90%', maxWidth: '500px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', animation: modalClosing ? 'slideOut 0.2s' : 'slideIn 0.3s', direction: 'rtl' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>{editingEvent ? 'ویرایش رویداد' : 'رویداد جدید'}</h3>
+              <button onClick={closeModal} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', padding: '0', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'} onMouseLeave={(e) => e.currentTarget.style.background = 'none'}>×</button>
+            </div>
             
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>عنوان</label>
@@ -514,26 +557,92 @@ const PersianCalendar = ({
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>زمان شروع</label>
-                <input 
-                  type="time" 
-                  value={eventForm.startTime} 
-                  onChange={(e) => setEventForm({ ...eventForm, startTime: e.target.value })}
-                  style={{ width: '100%', padding: '10px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', fontSize: '14px' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>زمان پایان</label>
-                <input 
-                  type="time" 
-                  value={eventForm.endTime} 
-                  onChange={(e) => setEventForm({ ...eventForm, endTime: e.target.value })}
-                  style={{ width: '100%', padding: '10px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', fontSize: '14px' }}
-                />
-              </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={eventForm.isAllDay} onChange={(e) => setEventForm({ ...eventForm, isAllDay: e.target.checked })} />
+                رویداد تمام روز
+              </label>
             </div>
+
+            {!eventForm.isAllDay && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>زمان شروع</label>
+                  <PersianTimePicker
+                    value={eventForm.startTime}
+                    onChange={(val) => setEventForm({ ...eventForm, startTime: val })}
+                    theme={defaultTheme}
+                    placeholder="زمان شروع"
+                    defaultValue="09:00"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>زمان پایان</label>
+                  <PersianTimePicker
+                    value={eventForm.endTime}
+                    onChange={(val) => setEventForm({ ...eventForm, endTime: val })}
+                    theme={defaultTheme}
+                    placeholder="زمان پایان"
+                    defaultValue="10:00"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={eventForm.isMultiDay} onChange={(e) => setEventForm({ ...eventForm, isMultiDay: e.target.checked, isRecurring: e.target.checked ? false : eventForm.isRecurring })} />
+                رویداد چند روزه
+              </label>
+            </div>
+
+            {eventForm.isMultiDay && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>تاریخ پایان</label>
+                <PersianDateTimePicker
+                  value={eventForm.endDate}
+                  onChange={(val) => setEventForm({ ...eventForm, endDate: val })}
+                  showTime={false}
+                  showFooter={false}
+                  theme={defaultTheme}
+                />
+              </div>
+            )}
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={eventForm.isRecurring} disabled={eventForm.isMultiDay} onChange={(e) => setEventForm({ ...eventForm, isRecurring: e.target.checked, isMultiDay: e.target.checked ? false : eventForm.isMultiDay })} />
+                رویداد تکراری
+              </label>
+            </div>
+
+            {eventForm.isRecurring && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>نوع تکرار</label>
+                  <select 
+                    value={eventForm.recurringType} 
+                    onChange={(e) => setEventForm({ ...eventForm, recurringType: e.target.value })}
+                    style={{ width: '100%', padding: '10px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', fontSize: '14px' }}
+                  >
+                    <option value="daily">روزانه</option>
+                    <option value="weekly">هفتگی</option>
+                    <option value="monthly">ماهانه</option>
+                    <option value="yearly">سالانه</option>
+                  </select>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>پایان تکرار</label>
+                  <PersianDateTimePicker
+                    value={eventForm.recurringEnd}
+                    onChange={(val) => setEventForm({ ...eventForm, recurringEnd: val })}
+                    showTime={false}
+                    showFooter={false}
+                    theme={defaultTheme}
+                  />
+                </div>
+              </div>
+            )}
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>رنگ</label>
@@ -567,7 +676,7 @@ const PersianCalendar = ({
                 </button>
               )}
               <button 
-                onClick={() => setShowEventModal(false)}
+                onClick={closeModal}
                 style={{ padding: '10px 20px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', fontWeight: '500', transition: 'all 0.2s' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.hoverColor}
                 onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}

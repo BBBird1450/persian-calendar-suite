@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import PersianDateTimePicker from '../src/PersianDateTimePicker.jsx';
 import PersianDateRangePicker from '../src/PersianDateRangePicker.jsx';
+import PersianTimePicker from '../src/PersianTimePicker.jsx';
 import CalendarDemo from './CalendarDemo.jsx';
 
 function App() {
@@ -17,16 +18,21 @@ function App() {
   });
   
   const [dt1, setDt1] = useState(null);
-  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true });
+  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true, minDate: null, maxDate: null });
   const [dt1Internal, setDt1Internal] = useState(null);
   
   const [range1, setRange1] = useState(null);
-  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true });
+  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true, minDate: null, maxDate: null });
   const [range1Internal, setRange1Internal] = useState(null);
+  
+  const [time1, setTime1] = useState('');
+  const [time1Config, setTime1Config] = useState({ minuteStep: 1, disabledHours: [], defaultValue: null, showFooter: false });
+  const [time1Internal, setTime1Internal] = useState('');
 
   const tabs = [
     { id: 'datetime', label: 'DateTime Picker', icon: '' },
     { id: 'range', label: 'Range Picker', icon: '' },
+    { id: 'timepicker', label: 'Time Picker', icon: '' },
     { id: 'calendar', label: 'Calendar', icon: '' }
   ];
 
@@ -74,6 +80,8 @@ function MyComponent() {
       onChange={setRange}
       showFooter={${range1Config.showFooter}}
       outputFormat="${range1Config.outputFormat}"
+      ${range1Config.minDate ? `minDate="${range1Config.minDate}"` : ''}
+      ${range1Config.maxDate ? `maxDate="${range1Config.maxDate}"` : ''}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -82,6 +90,29 @@ function MyComponent() {
         hoverColor: '${globalTheme.hoverColor}',
         selectedTextColor: '${globalTheme.selectedTextColor}',
         circularDates: ${globalTheme.circularDates}
+      }}
+    />
+  );
+}`;
+    } else if (activeTab === 'timepicker') {
+      return `import { PersianTimePicker } from 'persian-calendar-suite';
+
+function MyComponent() {
+  const [time, setTime] = useState('');
+
+  return (
+    <PersianTimePicker
+      value={time}
+      onChange={setTime}
+      minuteStep={${time1Config.minuteStep}}
+      ${time1Config.defaultValue ? `defaultValue="${time1Config.defaultValue}"` : ''}
+      ${time1Config.disabledHours.length > 0 ? `disabledHours={${JSON.stringify(time1Config.disabledHours)}}` : ''}
+      theme={{
+        primaryColor: '${globalTheme.primaryColor}',
+        backgroundColor: '${globalTheme.backgroundColor}',
+        textColor: '${globalTheme.textColor}',
+        borderColor: '${globalTheme.borderColor}',
+        hoverColor: '${globalTheme.hoverColor}'
       }}
     />
   );
@@ -141,18 +172,62 @@ function MyComponent() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px', color: 'white', animation: 'fadeIn 0.6s ease-out' }}>
           <h1 style={{ fontSize: '48px', margin: '0 0 16px 0', fontWeight: '700', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-            Persian DatePicker React
+            Persian Calendar Suite
           </h1>
-          <p style={{ fontSize: '20px', margin: '0 0 16px 0', opacity: 0.9 }}>
-            Comprehensive Jalali/Shamsi date picker components for React
+          <p style={{ fontSize: '20px', margin: '0 0 24px 0', opacity: 0.9 }}>
+            Comprehensive Persian (Jalali/Shamsi) calendar components for React
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <code style={{ padding: '8px 16px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', fontSize: '14px' }}>
-              npm install persian-calendar-suite
-            </code>
-            <a href="https://github.com/BBBird1450/persian-calendar-suite" target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.2)', borderRadius: '6px', color: 'white', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-              Documentation
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '12px 24px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', backdropFilter: 'blur(10px)' }}>
+            <code style={{ fontSize: '15px', fontWeight: '600', margin: 0 }}>npm install persian-calendar-suite</code>
+            <button onClick={(e) => { navigator.clipboard.writeText('npm install persian-calendar-suite'); e.currentTarget.textContent = 'Copied!'; setTimeout(() => e.currentTarget.textContent = 'Copy', 2000); }} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '12px', fontWeight: '600', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}>Copy</button>
+            
+            <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.3)' }}></div>
+            
+            <a href="https://github.com/BBBird1450/persian-calendar-suite" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'white', textDecoration: 'none', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s', opacity: 0.8 }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              GitHub
             </a>
+            
+            <a href="https://www.npmjs.com/package/persian-calendar-suite" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'white', textDecoration: 'none', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s', opacity: 0.8 }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}>
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0H1.763zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.377h-3.456L12.04 19.17H5.113z"/>
+              </svg>
+              NPM
+            </a>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginTop: '32px', maxWidth: '1000px', margin: '32px auto 0' }}>
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Persian Date Picker</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Single date/time picker with Shamsi calendar, date restrictions, and multiple output formats.</p>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Date Range Picker</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dual calendar range picker with min/max date restrictions and Persian display.</p>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Standalone Time Picker</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dedicated time selector with manual typing, defaults, and disabled hours.</p>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Full Calendar</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Event management with recurring, all-day, multi-day events and smooth animations.</p>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Advanced Features</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Event tooltips, read-only events, overlap detection, and Persian date formats.</p>
+            </div>
+            
+            <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Theme Customization</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Complete theme control with colors, borders, and circular dates.</p>
+            </div>
           </div>
         </div>
 
@@ -419,6 +494,24 @@ function MyComponent() {
                   <option value="timestamp">Timestamp</option>
                 </select>
               </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Min Date</label>
+                <input 
+                  type="date" 
+                  value={dt1Config.minDate || ''} 
+                  onChange={(e) => setDt1Config({...dt1Config, minDate: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Max Date</label>
+                <input 
+                  type="date" 
+                  value={dt1Config.maxDate || ''} 
+                  onChange={(e) => setDt1Config({...dt1Config, maxDate: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -433,6 +526,8 @@ function MyComponent() {
                 outputFormat={dt1Config.outputFormat}
                 showTime={dt1Config.showTime}
                 showFooter={dt1Config.showFooter}
+                minDate={dt1Config.minDate}
+                maxDate={dt1Config.maxDate}
               />
             </div>
 
@@ -510,6 +605,24 @@ function MyComponent() {
                   <option value="timestamp">Timestamp</option>
                 </select>
               </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Min Date</label>
+                <input 
+                  type="date" 
+                  value={range1Config.minDate || ''} 
+                  onChange={(e) => setRange1Config({...range1Config, minDate: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Max Date</label>
+                <input 
+                  type="date" 
+                  value={range1Config.maxDate || ''} 
+                  onChange={(e) => setRange1Config({...range1Config, maxDate: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -523,6 +636,8 @@ function MyComponent() {
                 theme={globalTheme}
                 outputFormat={range1Config.outputFormat}
                 showFooter={range1Config.showFooter}
+                minDate={range1Config.minDate}
+                maxDate={range1Config.maxDate}
               />
             </div>
 
@@ -535,6 +650,112 @@ function MyComponent() {
                   }
                   return JSON.stringify(range1, null, 2);
                 })() : <span style={{ color: '#9ca3af' }}>No range selected</span>}
+              </div>
+            </div>
+
+            <div style={{ position: 'relative', padding: '16px', background: '#1e1e1e', borderRadius: '12px', border: '1px solid #333' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#4ec9b0' }}>Code Example</div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(getCodeExample());
+                    const btn = event.target;
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => btn.textContent = ' Copy', 2000);
+                  }}
+                  style={{
+                    padding: '6px 12px',
+                    background: '#2d2d2d',
+                    color: '#d4d4d4',
+                    border: '1px solid #444',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3e'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#2d2d2d'}
+                >
+                   Copy
+                </button>
+              </div>
+              <pre style={{ margin: 0, color: '#d4d4d4', fontSize: '13px', lineHeight: '1.6', overflowX: 'auto', fontFamily: '"Consolas", "Monaco", "Courier New", monospace' }}>
+                <code>{getCodeExample()}</code>
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Time Picker Tab */}
+        {activeTab === 'timepicker' && (
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', animation: 'slideIn 0.5s ease-out' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
+               Time Picker
+            </h2>
+            <p style={{ margin: '0 0 24px 0', color: '#6b7280', fontSize: '14px' }}>
+              Standalone time selection component
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Minute Step</label>
+                <select 
+                  value={time1Config.minuteStep} 
+                  onChange={(e) => setTime1Config({...time1Config, minuteStep: parseInt(e.target.value)})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value={1}>1 minute</option>
+                  <option value={5}>5 minutes</option>
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Default Value</label>
+                <select 
+                  value={time1Config.defaultValue || ''} 
+                  onChange={(e) => setTime1Config({...time1Config, defaultValue: e.target.value || null})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value="">None</option>
+                  <option value="now">Current Time</option>
+                  <option value="09:00">09:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="18:00">18:00</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Disabled Hours</label>
+                <input 
+                  type="text" 
+                  value={time1Config.disabledHours.join(',')} 
+                  onChange={(e) => setTime1Config({...time1Config, disabledHours: e.target.value ? e.target.value.split(',').map(h => parseInt(h.trim())).filter(h => !isNaN(h)) : []})} 
+                  placeholder="0,1,2,22,23"
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
+              <PersianTimePicker
+                value={time1Internal}
+                onChange={(val) => {
+                  setTime1Internal(val);
+                  setTime1(val);
+                }}
+                theme={globalTheme}
+                minuteStep={time1Config.minuteStep}
+                defaultValue={time1Config.defaultValue}
+                disabledHours={time1Config.disabledHours}
+              />
+            </div>
+
+            <div style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', border: '2px solid #e5e7eb', marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Output Value:</div>
+              <div style={{ fontSize: '15px', fontFamily: 'monospace', color: '#1f2937', wordBreak: 'break-all' }}>
+                {time1 || <span style={{ color: '#9ca3af' }}>No time selected</span>}
               </div>
             </div>
 

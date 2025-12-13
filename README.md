@@ -123,6 +123,8 @@ const [value, setValue] = useState(null);
 | `showFooter` | `boolean` | `true` | Show OK/Cancel buttons |
 | `theme` | `ThemeObject` | `{}` | Theme customization |
 | `disabledHours` | `number[]` | `[]` | Array of disabled hours |
+| `minDate` | `string \| Date` | `null` | Minimum selectable date |
+| `maxDate` | `string \| Date` | `null` | Maximum selectable date |
 
 #### Example with Options
 
@@ -174,6 +176,8 @@ const [range, setRange] = useState(null);
 | `outputFormat` | `'iso' \| 'shamsi' \| 'gregorian' \| 'hijri' \| 'timestamp'` | `'iso'` | Output format |
 | `showFooter` | `boolean` | `true` | Show OK/Cancel buttons |
 | `theme` | `ThemeObject` | `{}` | Theme customization |
+| `minDate` | `string \| Date` | `null` | Minimum selectable date |
+| `maxDate` | `string \| Date` | `null` | Maximum selectable date |
 
 #### Example with Options
 
@@ -183,6 +187,56 @@ const [range, setRange] = useState(null);
   onChange={setRange}
   placeholder={['Start', 'End']}
   outputFormat="timestamp"
+  theme={{
+    primaryColor: '#10b981'
+  }}
+/>
+```
+
+---
+
+### PersianTimePicker
+
+Standalone time picker component.
+
+#### Import
+
+```jsx
+import { PersianTimePicker } from 'persian-calendar-suite';
+```
+
+#### Basic Usage
+
+```jsx
+const [time, setTime] = useState('');
+
+<PersianTimePicker
+  value={time}
+  onChange={setTime}
+/>
+```
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `string` | `''` | Selected time value (HH:MM) |
+| `onChange` | `(value: string) => void` | - | Callback when time changes |
+| `defaultValue` | `string \| 'now'` | `null` | Default time ('now' or 'HH:MM') |
+| `minuteStep` | `number` | `1` | Minute step interval |
+| `disabledHours` | `number[]` | `[]` | Array of disabled hours |
+| `placeholder` | `string` | `'انتخاب زمان'` | Placeholder text |
+| `theme` | `ThemeObject` | `{}` | Theme customization |
+
+#### Example with Options
+
+```jsx
+<PersianTimePicker
+  value={time}
+  onChange={setTime}
+  defaultValue="now"
+  minuteStep={15}
+  disabledHours={[0, 1, 2, 22, 23]}
   theme={{
     primaryColor: '#10b981'
   }}
@@ -240,6 +294,13 @@ const [events, setEvents] = useState([]);
   title: string;        // Event title
   color: string;        // Event color (hex)
   description?: string; // Event description (optional)
+  isAllDay?: boolean;   // All-day event flag
+  isRecurring?: boolean; // Recurring event flag
+  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly'; // Recurrence pattern
+  recurringEnd?: string; // End date for recurring events
+  isMultiDay?: boolean; // Multi-day event flag
+  endDate?: string;     // End date for multi-day events
+  readOnly?: boolean;   // Read-only event flag (cannot be edited)
 }
 ```
 
@@ -270,12 +331,24 @@ Click on any existing event to open the edit modal:
 - Delete button available in modal
 - Changes trigger `onEventUpdate` callback
 
-#### Overlap Detection
+#### Advanced Features
 
-Automatically detects overlapping events:
+**Event Types:**
+- **All-day events**: Check "رویداد تمام روز" to create events spanning entire days
+- **Multi-day events**: Check "رویداد چند روزه" to create events spanning multiple days
+- **Recurring events**: Check "رویداد تکراری" for daily/weekly/monthly/yearly repetition
+- **Today button**: Quick navigation to current date
+- **Event tooltips**: Hover over events to see full details
+
+**Overlap Detection:**
 - Shows orange badge with count (e.g., "2 تداخل")
 - Highlights slots with light orange background
 - Displays events side-by-side in day view
+
+**Visual Indicators:**
+- All-day events: Gradient background with dashed border and sun icon
+- Recurring events: Refresh icon after title
+- Multi-day and recurring events are mutually exclusive
 
 #### Full Example
 
@@ -288,7 +361,16 @@ const [events, setEvents] = useState([
     endTime: '10:00',
     title: 'Team Meeting',
     color: '#10b981',
-    description: 'Weekly team sync'
+    description: 'Weekly team sync',
+    isRecurring: true,
+    recurringType: 'weekly'
+  },
+  {
+    id: 2,
+    date: '2024-12-11',
+    title: 'Company Event',
+    color: '#ef4444',
+    isAllDay: true
   }
 ]);
 
@@ -637,6 +719,28 @@ function App() {
   value={value}
   onChange={setValue}
   showTime={false}
+/>
+```
+
+### Date Restrictions
+
+```jsx
+<PersianDateTimePicker
+  value={value}
+  onChange={setValue}
+  minDate="2024-01-01"
+  maxDate="2024-12-31"
+/>
+```
+
+### Time Picker with Default
+
+```jsx
+<PersianTimePicker
+  value={time}
+  onChange={setTime}
+  defaultValue="now"
+  minuteStep={15}
 />
 ```
 
