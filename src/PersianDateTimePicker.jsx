@@ -244,8 +244,8 @@ export default function PersianDateTimePicker({
           key={day}
           onClick={() => handleDateSelect(day)}
           style={{
-            width: '32px',
-            height: '32px',
+            width: window.innerWidth <= 768 ? '36px' : '32px',
+            height: window.innerWidth <= 768 ? '36px' : '32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -255,7 +255,7 @@ export default function PersianDateTimePicker({
             backgroundColor: isSelected ? defaultTheme.primaryColor : isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent',
             color: isDisabled ? '#ccc' : isSelected ? defaultTheme.selectedTextColor : defaultTheme.textColor,
             fontWeight: isSelected ? 'bold' : 'normal',
-            fontSize: '14px',
+            fontSize: window.innerWidth <= 768 ? '16px' : '14px',
             transition: 'all 0.2s',
             opacity: isDisabled ? 0.3 : 1
           }}
@@ -380,12 +380,25 @@ export default function PersianDateTimePicker({
               const rect = wrapperRef.current.getBoundingClientRect();
               const spaceBelow = window.innerHeight - rect.bottom;
               const dropdownHeight = 400;
-              if (spaceBelow >= dropdownHeight) {
-                el.style.top = `${rect.bottom + 4}px`;
+              const isMobile = window.innerWidth <= 768;
+              
+              if (isMobile) {
+                el.style.position = 'fixed';
+                el.style.top = '50%';
+                el.style.left = '50%';
+                el.style.transform = 'translate(-50%, -50%)';
+                el.style.width = 'calc(100vw - 32px)';
+                el.style.maxWidth = '400px';
               } else {
-                el.style.bottom = `${window.innerHeight - rect.top + 4}px`;
+                el.style.transform = 'none';
+                if (spaceBelow >= dropdownHeight) {
+                  el.style.top = `${rect.bottom + 4}px`;
+                } else {
+                  el.style.bottom = `${window.innerHeight - rect.top + 4}px`;
+                }
+                el.style.left = `${Math.max(16, Math.min(rect.left, window.innerWidth - (showTime ? 420 : 300) - 16))}px`;
+                el.style.width = showTime ? '420px' : '300px';
               }
-              el.style.left = `${rect.left}px`;
             }
           }}
           style={{
@@ -394,11 +407,11 @@ export default function PersianDateTimePicker({
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             borderRadius: '8px',
             background: defaultTheme.backgroundColor,
-            padding: '16px',
-            width: showTime ? '420px' : '300px',
+            padding: window.innerWidth <= 768 ? '12px' : '16px',
             maxWidth: 'calc(100vw - 32px)',
             display: 'flex',
-            gap: '16px',
+            flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+            gap: window.innerWidth <= 768 ? '12px' : '16px',
             animation: isClosing ? 'fadeOut 0.2s ease-in-out' : 'fadeIn 0.2s ease-in-out'
           }}>
           <style>{`
@@ -425,7 +438,7 @@ export default function PersianDateTimePicker({
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
                   {PERSIAN_WEEKDAYS.map(day => (
-                    <div key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
+                    <div key={day} style={{ width: window.innerWidth <= 768 ? '36px' : '32px', height: window.innerWidth <= 768 ? '36px' : '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                       {day}
                     </div>
                   ))}
@@ -452,7 +465,7 @@ export default function PersianDateTimePicker({
             )}
             </div>
             {showTime && (
-              <div style={{ borderLeft: `1px solid ${defaultTheme.borderColor}`, paddingLeft: '16px', display: 'flex', gap: '8px', minWidth: '120px' }}>
+              <div style={{ borderLeft: window.innerWidth <= 768 ? 'none' : `1px solid ${defaultTheme.borderColor}`, borderTop: window.innerWidth <= 768 ? `1px solid ${defaultTheme.borderColor}` : 'none', paddingLeft: window.innerWidth <= 768 ? '0' : '16px', paddingTop: window.innerWidth <= 768 ? '12px' : '0', display: 'flex', gap: '8px', minWidth: '120px' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '12px', color: defaultTheme.textColor, opacity: 0.6, textAlign: 'center', marginBottom: '8px' }}>دقیقه</div>
                   <div style={{ maxHeight: '250px', overflowY: 'auto', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '4px' }}>

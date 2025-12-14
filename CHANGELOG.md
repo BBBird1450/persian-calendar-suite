@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2024-12-13
+
+### Fixed
+- Output format changes now update immediately in demo
+- Mobile responsiveness for PersianDateTimePicker with centered modal positioning
+- Touch-friendly sizing with larger targets (36px) and fonts (16px) on mobile
+- Time picker switches to vertical layout on mobile devices
+
 ## [1.1.0] - 2024-12-13
 
 ### Added
