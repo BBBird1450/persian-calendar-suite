@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2024-12-13
+
+### Fixed
+- Fixed scroll inside picker closing the dropdown
+- Updated input styling
+- Improved input appearance with proper border radius and padding
+
 ## [1.1.2] - 2024-12-13
 
 ### Fixed

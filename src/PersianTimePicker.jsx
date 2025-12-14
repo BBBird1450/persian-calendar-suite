@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const PersianTimePicker = ({ 
   value = '', 
@@ -48,13 +48,13 @@ const PersianTimePicker = ({
 
   useEffect(() => {
     const handleScroll = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (showDropdown && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowDropdown(false);
       }
     };
     window.addEventListener('scroll', handleScroll, true);
     return () => window.removeEventListener('scroll', handleScroll, true);
-  }, []);
+  }, [showDropdown]);
 
   const hours = Array.from({ length: 24 }, (_, i) => i).filter(h => !disabledHours.includes(h));
   const minutes = Array.from({ length: 60 / minuteStep }, (_, i) => i * minuteStep);
@@ -97,18 +97,22 @@ const PersianTimePicker = ({
         }}
         onClick={() => setShowDropdown(!showDropdown)}
         style={{
+          boxSizing: 'border-box',
+          margin: 0,
+          padding: '4px 11px',
+          color: 'rgba(0, 0, 0, 0.88)',
+          fontSize: 'inherit',
+          lineHeight: 1.57,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
           width: '100%',
-          padding: '10px 12px',
-          border: `2px solid ${showDropdown ? defaultTheme.primaryColor : defaultTheme.borderColor}`,
-          borderRadius: '8px',
-          fontSize: '14px',
+          textAlign: 'center',
+          backgroundColor: 'transparent',
+          border: `1px solid ${showDropdown ? defaultTheme.primaryColor : defaultTheme.borderColor}`,
+          borderRadius: '6px',
+          outline: 0,
+          transition: 'all 0.2s linear',
           cursor: 'text',
-          background: defaultTheme.backgroundColor,
-          color: defaultTheme.textColor,
-          outline: 'none',
-          transition: 'all 0.2s',
-          direction: 'ltr',
-          textAlign: 'center'
+          direction: 'ltr'
         }}
       />
 

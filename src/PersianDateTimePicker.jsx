@@ -78,8 +78,8 @@ export default function PersianDateTimePicker({
         }, 200);
       }
     };
-    const handleScroll = () => {
-      if (showCalendar) {
+    const handleScroll = (event) => {
+      if (showCalendar && wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsClosing(true);
         setTimeout(() => {
           setShowCalendar(false);
@@ -371,7 +371,24 @@ export default function PersianDateTimePicker({
           onClick={() => setShowCalendar(!showCalendar)}
           placeholder="تاریخ را انتخاب کنید"
           readOnly
-          style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', direction: 'rtl' }}
+          style={{ 
+            boxSizing: 'border-box',
+            margin: 0,
+            padding: '4px 11px',
+            color: 'rgba(0, 0, 0, 0.88)',
+            fontSize: 'inherit',
+            lineHeight: 1.57,
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
+            width: '100%',
+            textAlign: 'start',
+            backgroundColor: 'transparent',
+            border: `1px solid ${defaultTheme.borderColor}`,
+            borderRadius: '6px',
+            outline: 0,
+            transition: 'all 0.2s linear',
+            cursor: 'pointer',
+            direction: 'rtl'
+          }}
         />
         {showCalendar && (
           <div
