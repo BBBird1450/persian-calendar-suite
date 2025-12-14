@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2024-12-13
+
+### Fixed
+- Added React import to fix "React is not defined" error in external projects
+
 ## [1.1.1] - 2024-12-13
 
 ### Fixed
