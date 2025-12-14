@@ -517,6 +517,7 @@ function MyComponent() {
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
               <PersianDateTimePicker
+                key={`dt-${dt1Config.outputFormat}-${dt1Config.showTime}-${dt1Config.showFooter}`}
                 value={dt1Internal}
                 onChange={(val) => {
                   setDt1Internal(val);
@@ -628,6 +629,7 @@ function MyComponent() {
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
               <PersianDateRangePicker
+                key={`range-${range1Config.outputFormat}-${range1Config.showFooter}`}
                 value={range1Internal}
                 onChange={(val) => {
                   setRange1Internal(val);
