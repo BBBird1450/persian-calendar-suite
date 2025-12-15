@@ -1,4 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+const toPersianDigits = (str) => str.toString().replace(/\d/g, (digit) => PERSIAN_DIGITS[parseInt(digit)]);
 
 const PersianDateRangePicker = ({ 
   value, 
@@ -8,7 +11,9 @@ const PersianDateRangePicker = ({
   className = '',
   theme = {},
   outputFormat = 'iso',
-  showFooter = true
+  showFooter = true,
+  persianNumbers = false,
+  rtlCalendar = false
 }) => {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -158,6 +163,7 @@ const PersianDateRangePicker = ({
 
   const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
   const weekDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+  const weekDaysRTL = ['ج', 'پ', 'چ', 'س', 'د', 'ی', 'ش'];
 
   const getDaysInMonth = (year, month) => {
     if (month <= 6) return 31;
@@ -350,7 +356,7 @@ const PersianDateRangePicker = ({
             }
           }}
         >
-          {day}
+          {persianNumbers ? toPersianDigits(day) : day}
         </div>
       );
     }
@@ -457,9 +463,9 @@ const PersianDateRangePicker = ({
   };
 
   const displayValue = startDate && endDate 
-    ? `${formatDate(startDate)} ~ ${formatDate(endDate)}`
+    ? `${persianNumbers ? toPersianDigits(formatDate(startDate)) : formatDate(startDate)} ~ ${persianNumbers ? toPersianDigits(formatDate(endDate)) : formatDate(endDate)}`
     : startDate
-    ? formatDate(startDate)
+    ? (persianNumbers ? toPersianDigits(formatDate(startDate)) : formatDate(startDate))
     : '';
 
   return (
@@ -527,13 +533,13 @@ const PersianDateRangePicker = ({
               {leftViewMode === 'day' && (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
-                    {weekDays.map(day => (
+                    {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
                       <div key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', direction: rtlCalendar ? 'rtl' : 'ltr' }}>
                     {renderCalendar(leftYear, leftMonth)}
                   </div>
                 </>
@@ -562,13 +568,13 @@ const PersianDateRangePicker = ({
               {rightViewMode === 'day' && (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
-                    {weekDays.map(day => (
+                    {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
                       <div key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', direction: rtlCalendar ? 'rtl' : 'ltr' }}>
                     {renderCalendar(rightYear, rightMonth)}
                   </div>
                 </>

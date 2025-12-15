@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 const PERSIAN_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 const PERSIAN_WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+const PERSIAN_WEEKDAYS_RTL = ['ج', 'پ', 'چ', 'س', 'د', 'ی', 'ش'];
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+const toPersianDigits = (str) => {
+  return str.toString().replace(/\d/g, (digit) => PERSIAN_DIGITS[parseInt(digit)]);
+};
 
 export default function PersianDateTimePicker({ 
   value, 
@@ -13,7 +19,9 @@ export default function PersianDateTimePicker({
   outputFormat = 'iso',
   showFooter = true,
   minDate = null,
-  maxDate = null
+  maxDate = null,
+  persianNumbers = false,
+  rtlCalendar = false
 }) {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -262,7 +270,7 @@ export default function PersianDateTimePicker({
           onMouseEnter={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = defaultTheme.hoverColor)}
           onMouseLeave={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent')}
         >
-          {day}
+          {persianNumbers ? toPersianDigits(day) : day}
         </div>
       );
     }
@@ -356,11 +364,16 @@ export default function PersianDateTimePicker({
   const goToToday = () => {
     if (today) {
       setDisplayMonth({ year: today.year, month: today.month });
+      setSelectedDay(today);
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      setTimeStr(currentTime);
+      updateValue(today, currentTime);
     }
   };
 
   const displayValue = selectedDay 
-    ? `${selectedDay.year}/${String(selectedDay.month).padStart(2, '0')}/${String(selectedDay.day).padStart(2, '0')}${showTime ? ` ${timeStr}` : ''}`
+    ? `${persianNumbers ? toPersianDigits(selectedDay.year) : selectedDay.year}/${persianNumbers ? toPersianDigits(String(selectedDay.month).padStart(2, '0')) : String(selectedDay.month).padStart(2, '0')}/${persianNumbers ? toPersianDigits(String(selectedDay.day).padStart(2, '0')) : String(selectedDay.day).padStart(2, '0')}${showTime ? ` ${persianNumbers ? toPersianDigits(timeStr) : timeStr}` : ''}`
     : '';
 
   return (
@@ -454,13 +467,13 @@ export default function PersianDateTimePicker({
             {viewMode === 'day' && (
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
-                  {PERSIAN_WEEKDAYS.map(day => (
+                  {(rtlCalendar ? PERSIAN_WEEKDAYS_RTL : PERSIAN_WEEKDAYS).map(day => (
                     <div key={day} style={{ width: window.innerWidth <= 768 ? '36px' : '32px', height: window.innerWidth <= 768 ? '36px' : '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                       {day}
                     </div>
                   ))}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '12px', direction: rtlCalendar ? 'rtl' : 'ltr' }}>
                   {renderCalendar()}
                 </div>
               </>
@@ -472,7 +485,7 @@ export default function PersianDateTimePicker({
             {showFooter && (
               <div style={{ borderTop: `1px solid ${defaultTheme.borderColor}`, paddingTop: '12px' }}>
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
-                  <button onClick={goToToday} style={{ padding: '4px 12px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '4px', background: defaultTheme.backgroundColor, cursor: 'pointer', fontSize: '12px', color: defaultTheme.textColor }}>امروز</button>
+                  <button onClick={goToToday} style={{ padding: '4px 12px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '4px', background: defaultTheme.backgroundColor, cursor: 'pointer', fontSize: '12px', color: defaultTheme.textColor }}>الان</button>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button onClick={handleCancel} style={{ padding: '4px 12px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '4px', background: defaultTheme.backgroundColor, cursor: 'pointer', fontSize: '12px', color: defaultTheme.textColor }}>لغو</button>
                     <button onClick={handleOk} style={{ padding: '4px 12px', border: 'none', borderRadius: '4px', background: defaultTheme.primaryColor, color: defaultTheme.selectedTextColor, cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>تایید</button>
@@ -497,7 +510,7 @@ export default function PersianDateTimePicker({
                         onMouseEnter={(e) => timeStr.split(':')[1] !== String(m).padStart(2, '0') && (e.target.style.background = defaultTheme.hoverColor)}
                         onMouseLeave={(e) => timeStr.split(':')[1] !== String(m).padStart(2, '0') && (e.target.style.background = defaultTheme.backgroundColor)}
                       >
-                        {String(m).padStart(2, '0')}
+                        {persianNumbers ? toPersianDigits(String(m).padStart(2, '0')) : String(m).padStart(2, '0')}
                       </div>
                     ))}
                   </div>
@@ -516,7 +529,7 @@ export default function PersianDateTimePicker({
                         onMouseEnter={(e) => timeStr.split(':')[0] !== String(h).padStart(2, '0') && (e.target.style.background = defaultTheme.hoverColor)}
                         onMouseLeave={(e) => timeStr.split(':')[0] !== String(h).padStart(2, '0') && (e.target.style.background = defaultTheme.backgroundColor)}
                       >
-                        {String(h).padStart(2, '0')}
+                        {persianNumbers ? toPersianDigits(String(h).padStart(2, '0')) : String(h).padStart(2, '0')}
                       </div>
                     ))}
                   </div>

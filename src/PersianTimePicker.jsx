@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+const toPersianDigits = (str) => str.toString().replace(/\d/g, (digit) => PERSIAN_DIGITS[parseInt(digit)]);
+
 const PersianTimePicker = ({ 
   value = '', 
   onChange, 
@@ -7,7 +10,8 @@ const PersianTimePicker = ({
   minuteStep = 1,
   disabledHours = [],
   placeholder = 'انتخاب زمان',
-  defaultValue = null
+  defaultValue = null,
+  persianNumbers = false
 }) => {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -133,7 +137,17 @@ const PersianTimePicker = ({
         }}>
           <div style={{ display: 'flex', height: '200px' }}>
             <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
-              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>ساعت</div>
+              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>ساعت</span>
+                <button onClick={() => {
+                  const now = new Date();
+                  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                  setSelectedHour(now.getHours());
+                  setSelectedMinute(now.getMinutes());
+                  onChange?.(currentTime);
+                  setShowDropdown(false);
+                }} style={{ padding: '2px 6px', fontSize: '9px', border: 'none', background: defaultTheme.primaryColor, color: '#fff', borderRadius: '3px', cursor: 'pointer' }}>الان</button>
+              </div>
               {hours.map(hour => (
                 <div
                   key={hour}
@@ -153,7 +167,7 @@ const PersianTimePicker = ({
                     if (selectedHour !== hour) e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  {String(hour).padStart(2, '0')}
+                  {persianNumbers ? toPersianDigits(String(hour).padStart(2, '0')) : String(hour).padStart(2, '0')}
                 </div>
               ))}
             </div>
@@ -178,7 +192,7 @@ const PersianTimePicker = ({
                     if (selectedMinute !== minute) e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  {String(minute).padStart(2, '0')}
+                  {persianNumbers ? toPersianDigits(String(minute).padStart(2, '0')) : String(minute).padStart(2, '0')}
                 </div>
               ))}
             </div>

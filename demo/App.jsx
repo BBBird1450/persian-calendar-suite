@@ -18,15 +18,15 @@ function App() {
   });
   
   const [dt1, setDt1] = useState(null);
-  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true, minDate: null, maxDate: null });
+  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: false });
   const [dt1Internal, setDt1Internal] = useState(null);
   
   const [range1, setRange1] = useState(null);
-  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true, minDate: null, maxDate: null });
+  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: false });
   const [range1Internal, setRange1Internal] = useState(null);
   
   const [time1, setTime1] = useState('');
-  const [time1Config, setTime1Config] = useState({ minuteStep: 1, disabledHours: [], defaultValue: null, showFooter: false });
+  const [time1Config, setTime1Config] = useState({ minuteStep: 1, disabledHours: [], defaultValue: null, showFooter: false, persianNumbers: false });
   const [time1Internal, setTime1Internal] = useState('');
 
   const tabs = [
@@ -56,6 +56,8 @@ function MyComponent() {
       showTime={${dt1Config.showTime}}
       showFooter={${dt1Config.showFooter}}
       outputFormat="${dt1Config.outputFormat}"
+      persianNumbers={${dt1Config.persianNumbers}}
+      rtlCalendar={${dt1Config.rtlCalendar}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -82,6 +84,8 @@ function MyComponent() {
       outputFormat="${range1Config.outputFormat}"
       ${range1Config.minDate ? `minDate="${range1Config.minDate}"` : ''}
       ${range1Config.maxDate ? `maxDate="${range1Config.maxDate}"` : ''}
+      persianNumbers={${range1Config.persianNumbers}}
+      rtlCalendar={${range1Config.rtlCalendar}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -107,6 +111,7 @@ function MyComponent() {
       minuteStep={${time1Config.minuteStep}}
       ${time1Config.defaultValue ? `defaultValue="${time1Config.defaultValue}"` : ''}
       ${time1Config.disabledHours.length > 0 ? `disabledHours={${JSON.stringify(time1Config.disabledHours)}}` : ''}
+      persianNumbers={${time1Config.persianNumbers}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -472,13 +477,21 @@ function MyComponent() {
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
-                <input type="checkbox" checked={dt1Config.showTime} onChange={(e) => setDt1Config({...dt1Config, showTime: e.target.checked})} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={dt1Config.showTime} onChange={(e) => setDt1Config({...dt1Config, showTime: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 Show Time
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
-                <input type="checkbox" checked={dt1Config.showFooter} onChange={(e) => setDt1Config({...dt1Config, showFooter: e.target.checked})} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={dt1Config.showFooter} onChange={(e) => setDt1Config({...dt1Config, showFooter: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 Show Footer
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={dt1Config.persianNumbers} onChange={(e) => setDt1Config({...dt1Config, persianNumbers: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Persian Numbers
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={dt1Config.rtlCalendar} onChange={(e) => setDt1Config({...dt1Config, rtlCalendar: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                RTL Calendar
               </label>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Output Format</label>
@@ -529,6 +542,8 @@ function MyComponent() {
                 showFooter={dt1Config.showFooter}
                 minDate={dt1Config.minDate}
                 maxDate={dt1Config.maxDate}
+                persianNumbers={dt1Config.persianNumbers}
+                rtlCalendar={dt1Config.rtlCalendar}
               />
             </div>
 
@@ -588,9 +603,17 @@ function MyComponent() {
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
-                <input type="checkbox" checked={range1Config.showFooter} onChange={(e) => setRange1Config({...range1Config, showFooter: e.target.checked})} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={range1Config.showFooter} onChange={(e) => setRange1Config({...range1Config, showFooter: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 Show Footer
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={range1Config.persianNumbers} onChange={(e) => setRange1Config({...range1Config, persianNumbers: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Persian Numbers
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={range1Config.rtlCalendar} onChange={(e) => setRange1Config({...range1Config, rtlCalendar: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                RTL Calendar
               </label>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Output Format</label>
@@ -629,7 +652,7 @@ function MyComponent() {
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
               <PersianDateRangePicker
-                key={`range-${range1Config.outputFormat}-${range1Config.showFooter}`}
+                key={`range-${range1Config.outputFormat}-${range1Config.showFooter}-${range1Config.persianNumbers}-${range1Config.rtlCalendar}`}
                 value={range1Internal}
                 onChange={(val) => {
                   setRange1Internal(val);
@@ -640,6 +663,8 @@ function MyComponent() {
                 showFooter={range1Config.showFooter}
                 minDate={range1Config.minDate}
                 maxDate={range1Config.maxDate}
+                persianNumbers={range1Config.persianNumbers}
+                rtlCalendar={range1Config.rtlCalendar}
               />
             </div>
 
@@ -737,6 +762,10 @@ function MyComponent() {
                   style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
                 />
               </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={time1Config.persianNumbers} onChange={(e) => setTime1Config({...time1Config, persianNumbers: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Persian Numbers
+              </label>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -751,6 +780,7 @@ function MyComponent() {
                 minuteStep={time1Config.minuteStep}
                 defaultValue={time1Config.defaultValue}
                 disabledHours={time1Config.disabledHours}
+                persianNumbers={time1Config.persianNumbers}
               />
             </div>
 

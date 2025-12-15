@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.5] - 2024-12-13
+
+### Added
+- "Now" button in PersianTimePicker to quickly set current time
+- Updated "Today" button in PersianDateTimePicker to "Now" - sets both current date and time
+- Persian number display support for all components (DateTimePicker, DateRangePicker, TimePicker)
+- RTL calendar layout support for DateTimePicker and DateRangePicker
+- Improved checkbox styling in demo with hover effects and accent colors
+
+## [1.1.4] - 2024-12-13
+
+### Added
+- Persian number display option (`persianNumbers` prop) for showing digits in Persian format
+- RTL calendar layout option (`rtlCalendar` prop) to start weekdays from right (Saturday first)
+- Added PersianTimePicker component documentation in README
+
 ## [1.1.3] - 2024-12-13
 
 ### Fixed

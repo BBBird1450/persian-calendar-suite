@@ -15,6 +15,7 @@ A comprehensive Persian (Jalali/Shamsi) calendar suite for React with datepicker
 - [Components](#components)
   - [PersianDateTimePicker](#persiandatetimepicker)
   - [PersianDateRangePicker](#persiandaterangepicker)
+  - [PersianTimePicker](#persiantimepicker)
   - [PersianCalendar](#persiancalendar)
 - [Theme Customization](#theme-customization)
 - [Output Formats](#output-formats)
@@ -125,6 +126,8 @@ const [value, setValue] = useState(null);
 | `disabledHours` | `number[]` | `[]` | Array of disabled hours |
 | `minDate` | `string \| Date` | `null` | Minimum selectable date |
 | `maxDate` | `string \| Date` | `null` | Maximum selectable date |
+| `persianNumbers` | `boolean` | `false` | Display numbers in Persian digits |
+| `rtlCalendar` | `boolean` | `false` | Start calendar from right (Sunday first) |
 
 #### Example with Options
 
@@ -178,6 +181,8 @@ const [range, setRange] = useState(null);
 | `theme` | `ThemeObject` | `{}` | Theme customization |
 | `minDate` | `string \| Date` | `null` | Minimum selectable date |
 | `maxDate` | `string \| Date` | `null` | Maximum selectable date |
+| `persianNumbers` | `boolean` | `false` | Display numbers in Persian digits |
+| `rtlCalendar` | `boolean` | `false` | Start calendar from right (Sunday first) |
 
 #### Example with Options
 
@@ -226,6 +231,7 @@ const [time, setTime] = useState('');
 | `minuteStep` | `number` | `1` | Minute step interval |
 | `disabledHours` | `number[]` | `[]` | Array of disabled hours |
 | `placeholder` | `string` | `'انتخاب زمان'` | Placeholder text |
+| `persianNumbers` | `boolean` | `false` | Display numbers in Persian digits |
 | `theme` | `ThemeObject` | `{}` | Theme customization |
 
 #### Example with Options
