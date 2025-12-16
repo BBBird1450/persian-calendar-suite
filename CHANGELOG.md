@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.6] - 2024-12-13
+
+### Fixed
+- Added React import to PersianCalendar and PersianDateRangePicker to fix "React is not defined" errors
+
 ## [1.1.5] - 2024-12-13
 
 ### Added
