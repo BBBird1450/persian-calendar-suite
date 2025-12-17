@@ -44,6 +44,7 @@ const PersianDateRangePicker = ({
   const [rightMonth, setRightMonth] = useState(null);
   const [rightYear, setRightYear] = useState(null);
   const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
   const [leftViewMode, setLeftViewMode] = useState('day');
   const [rightViewMode, setRightViewMode] = useState('day');
   const [leftYearPage, setLeftYearPage] = useState(0);
@@ -83,8 +84,8 @@ const PersianDateRangePicker = ({
         }, 200);
       }
     };
-    const handleScroll = () => {
-      if (isOpen) {
+    const handleScroll = (e) => {
+      if (isOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsClosing(true);
         setTimeout(() => {
           setIsOpen(false);
@@ -311,15 +312,16 @@ const PersianDateRangePicker = ({
       const isStart = isDateStart(year, month, day);
       const isEnd = isDateEnd(year, month, day);
       
+      const isMobile = window.innerWidth <= 768;
       const dayStyle = {
-        width: '32px',
-        height: '32px',
+        width: isMobile ? '30px' : '32px',
+        height: isMobile ? '30px' : '32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         border: `1px solid ${defaultTheme.borderColor}`,
-        fontSize: '14px',
+        fontSize: isMobile ? '14px' : '14px',
         color: defaultTheme.textColor,
         transition: 'all 0.2s'
       };
@@ -338,6 +340,7 @@ const PersianDateRangePicker = ({
 
       days.push(
         <div
+          className="range-day"
           key={day}
           style={dayStyle}
           onClick={() => handleDateClick(year, month, day)}
@@ -366,7 +369,7 @@ const PersianDateRangePicker = ({
 
   const renderMonthPicker = (month, setMonth, setViewMode) => {
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '8px', maxHeight: '300px', overflowY: 'auto' }}>
         {persianMonths.map((m, i) => (
           <div
             key={i}
@@ -398,7 +401,7 @@ const PersianDateRangePicker = ({
     const startYear = year - 4 + (yearPage * 12);
     const years = Array.from({ length: 12 }, (_, i) => startYear + i);
     return (
-      <div>
+      <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', marginBottom: '8px' }}>
           <button onClick={() => setYearPage(yearPage - 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', color: defaultTheme.primaryColor }}>«</button>
           <span style={{ color: defaultTheme.textColor, fontWeight: 'bold' }}>{startYear} - {startYear + 11}</span>
@@ -476,45 +479,48 @@ const PersianDateRangePicker = ({
         placeholder={`${placeholder[0]} ~ ${placeholder[1]}`}
         readOnly
         disabled={disabled}
-        style={{ width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '14px', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, fontFamily: 'inherit', transition: 'all 0.2s', direction: 'rtl' }}
+        style={{ width: '100%', padding: '4px 11px', border: '1px solid #d9d9d9', borderRadius: '6px', fontSize: '14px', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, fontFamily: 'inherit', transition: 'all 0.2s', direction: 'rtl', boxSizing: 'border-box', lineHeight: '1.57' }}
       />
 
       {isOpen && (
-        <div 
+        <div
+          ref={dropdownRef}
           onMouseLeave={() => setHoverDate(null)}
-          ref={(el) => {
-            if (el && containerRef.current) {
-              const rect = containerRef.current.getBoundingClientRect();
-              const spaceBelow = window.innerHeight - rect.bottom;
-              const dropdownHeight = 450;
-              if (spaceBelow >= dropdownHeight) {
-                el.style.top = `${rect.bottom + 4}px`;
-              } else {
-                el.style.bottom = `${window.innerHeight - rect.top + 4}px`;
-              }
-              el.style.left = `${rect.left}px`;
-            }
-          }}
           style={{
             position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             zIndex: 1000,
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             borderRadius: '8px',
             background: defaultTheme.backgroundColor,
-            padding: '16px',
+            padding: window.innerWidth <= 768 ? '8px' : '16px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
-            animation: isClosing ? 'fadeOut 0.2s ease-in-out' : 'fadeIn 0.2s ease-in-out'
+            gap: window.innerWidth <= 768 ? '8px' : '16px',
+            animation: isClosing ? 'fadeOut 0.2s ease-in-out' : 'fadeIn 0.2s ease-in-out',
+            maxWidth: 'calc(100vw - 16px)',
+            maxHeight: 'calc(100vh - 16px)',
+            overflowY: 'auto'
           }}
+          onScroll={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           <style>{`
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-            @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+            @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+            @keyframes fadeOut { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } }
             @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+            @media (max-width: 768px) {
+              .range-calendars { flex-direction: column !important; }
+              .range-calendar { min-width: 240px !important; max-width: 100% !important; }
+              .range-day { width: 30px !important; height: 30px !important; font-size: 14px !important; }
+              .range-weekday { width: 30px !important; height: 30px !important; font-size: 10px !important; }
+            }
           `}</style>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ minWidth: '300px' }}>
+          <div className="range-calendars" style={{ display: 'flex', gap: window.innerWidth <= 768 ? '8px' : '16px' }}>
+            <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
                 {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
@@ -529,12 +535,12 @@ const PersianDateRangePicker = ({
                 {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
-              <div style={{ animation: 'slideIn 0.2s ease-in-out' }}>
+              <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>
               {leftViewMode === 'day' && (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
                     {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
-                      <div key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
+                      <div className="range-weekday" key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
                       </div>
                     ))}
@@ -549,7 +555,7 @@ const PersianDateRangePicker = ({
               </div>
             </div>
 
-            <div style={{ minWidth: '300px' }}>
+            <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
                 {rightViewMode === 'day' && <button onClick={() => changeRightMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
@@ -564,12 +570,12 @@ const PersianDateRangePicker = ({
                 {rightViewMode === 'day' && <button onClick={() => changeRightMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
-              <div style={{ animation: 'slideIn 0.2s ease-in-out' }}>
+              <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>
               {rightViewMode === 'day' && (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
                     {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
-                      <div key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
+                      <div className="range-weekday" key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
                       </div>
                     ))}

@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2024-12-13
+
+### Added
+- PersianTimeline component for chronological event visualization
+- Support for vertical and horizontal timeline orientations
+- Customizable event markers (circular/rectangular shapes)
+- Event icons and images support
+- Alternating event layout for vertical timelines
+- Persian date formatting in timeline events
+- Timeline-specific theme customization (lineColor, markerSize)
+- Time range picker mode for PersianTimePicker (`isRange` prop)
+- Returns array `[startTime, endTime]` when isRange is enabled
+- Mobile responsive design for PersianDateRangePicker
+- Centered modal positioning on mobile devices
+- Smaller sizing on mobile (240px width, 30px days, 8px padding)
+- Mobile responsive PersianTimeline component
+- Adaptive sizing for timeline events and markers on mobile
+- Disabled alternating layout on mobile for better readability
+
+### Fixed
+- Scroll inside PersianDateRangePicker no longer closes the dropdown
+- PersianDateRangePicker layout issues on mobile devices
+- Event card sizing and spacing optimized for mobile screens
+
 ## [1.1.6] - 2024-12-13
 
 ### Fixed

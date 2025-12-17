@@ -17,6 +17,7 @@ A comprehensive Persian (Jalali/Shamsi) calendar suite for React with datepicker
   - [PersianDateRangePicker](#persiandaterangepicker)
   - [PersianTimePicker](#persiantimepicker)
   - [PersianCalendar](#persiancalendar)
+  - [PersianTimeline](#persiantimeline)
 - [Theme Customization](#theme-customization)
 - [Output Formats](#output-formats)
 - [Programmatic Control](#programmatic-control)
@@ -232,6 +233,7 @@ const [time, setTime] = useState('');
 | `disabledHours` | `number[]` | `[]` | Array of disabled hours |
 | `placeholder` | `string` | `'انتخاب زمان'` | Placeholder text |
 | `persianNumbers` | `boolean` | `false` | Display numbers in Persian digits |
+| `isRange` | `boolean` | `false` | Enable time range selection |
 | `theme` | `ThemeObject` | `{}` | Theme customization |
 
 #### Example with Options
@@ -245,6 +247,166 @@ const [time, setTime] = useState('');
   disabledHours={[0, 1, 2, 22, 23]}
   theme={{
     primaryColor: '#10b981'
+  }}
+/>
+```
+
+#### Time Range Picker
+
+```jsx
+const [timeRange, setTimeRange] = useState([]);
+
+<PersianTimePicker
+  value={timeRange}
+  onChange={setTimeRange}
+  isRange={true}
+  minuteStep={15}
+/>
+// Output: ["09:00", "17:00"]
+```
+
+---
+
+### PersianTimeline
+
+Timeline component for displaying chronological events with Persian dates.
+
+#### Import
+
+```jsx
+import { PersianTimeline } from 'persian-calendar-suite';
+```
+
+#### Basic Usage
+
+```jsx
+const [events] = useState([
+  {
+    id: 1,
+    date: '2024-12-10',
+    time: '14:30',
+    title: 'Project Started',
+    description: 'Initial project setup and planning',
+    color: '#10b981',
+    icon: '🚀'
+  },
+  {
+    id: 2,
+    date: '2024-12-15',
+    title: 'Milestone Reached',
+    color: '#6366f1',
+    image: '/milestone.jpg'
+  }
+]);
+
+<PersianTimeline
+  events={events}
+  onEventClick={(event) => console.log(event)}
+/>
+```
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `events` | `Event[]` | `[]` | Array of timeline events |
+| `onEventClick` | `(event: Event) => void` | - | Callback when event is clicked |
+| `direction` | `'vertical' \| 'horizontal'` | `'vertical'` | Timeline orientation |
+| `markerShape` | `'circular' \| 'rect'` | `'circular'` | Shape of event markers |
+| `showIcons` | `boolean` | `true` | Show event icons/images |
+| `alternating` | `boolean` | `true` | Alternate event sides (vertical only) |
+| `persianNumbers` | `boolean` | `false` | Display numbers in Persian digits |
+| `theme` | `ThemeObject` | `{}` | Theme customization |
+
+#### Event Object
+
+```typescript
+{
+  id: number;           // Unique identifier
+  date: string;         // ISO date string (YYYY-MM-DD)
+  time?: string;        // Optional time (HH:mm)
+  title: string;        // Event title
+  description?: string; // Event description
+  color?: string;       // Event color (hex)
+  icon?: string | ReactNode; // Event icon (emoji or component)
+  image?: string;       // Event image URL
+}
+```
+
+#### Timeline Types
+
+**Vertical Timeline (default)**
+```jsx
+<PersianTimeline
+  events={events}
+  direction="vertical"
+  alternating={true}
+/>
+```
+
+**Horizontal Timeline**
+```jsx
+<PersianTimeline
+  events={events}
+  direction="horizontal"
+/>
+```
+
+**Custom Markers**
+```jsx
+<PersianTimeline
+  events={events}
+  markerShape="rect"
+  showIcons={true}
+/>
+```
+
+#### Advanced Example
+
+```jsx
+const timelineEvents = [
+  {
+    id: 1,
+    date: '2024-01-15',
+    time: '09:00',
+    title: 'Project Kickoff',
+    description: 'Initial team meeting and project planning session',
+    color: '#10b981',
+    icon: '🎯'
+  },
+  {
+    id: 2,
+    date: '2024-02-20',
+    title: 'Design Phase Complete',
+    description: 'UI/UX designs approved and ready for development',
+    color: '#6366f1',
+    image: '/design-preview.jpg'
+  },
+  {
+    id: 3,
+    date: '2024-03-30',
+    time: '16:00',
+    title: 'Beta Release',
+    description: 'First beta version released to testing team',
+    color: '#f59e0b',
+    icon: <svg>...</svg>
+  }
+];
+
+<PersianTimeline
+  events={timelineEvents}
+  direction="vertical"
+  markerShape="circular"
+  alternating={true}
+  persianNumbers={true}
+  onEventClick={(event) => {
+    console.log('Timeline event clicked:', event);
+  }}
+  theme={{
+    primaryColor: '#6366f1',
+    lineColor: '#e5e7eb',
+    markerSize: '16px',
+    eventRadius: '12px'
   }}
 />
 ```
@@ -796,6 +958,15 @@ function App() {
 />
 ```
 
+## Mobile Support
+
+All components are fully responsive and optimized for mobile devices:
+- Touch-friendly interface with larger tap targets
+- Adaptive layouts for small screens
+- Centered modals on mobile
+- Optimized spacing and font sizes
+- Smooth scrolling within pickers
+
 ## Browser Support
 
 - Chrome (latest)
@@ -803,6 +974,7 @@ function App() {
 - Safari (latest)
 - Edge (latest)
 - Opera (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile, Samsung Internet)
 
 ## License
 
