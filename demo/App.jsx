@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import PersianDateTimePicker from '../src/PersianDateTimePicker.jsx';
 import PersianDateRangePicker from '../src/PersianDateRangePicker.jsx';
 import PersianTimePicker from '../src/PersianTimePicker.jsx';
+import PersianTimeline from '../src/PersianTimeline.jsx';
 import CalendarDemo from './CalendarDemo.jsx';
 
 function App() {
@@ -26,14 +27,62 @@ function App() {
   const [range1Internal, setRange1Internal] = useState(null);
   
   const [time1, setTime1] = useState('');
-  const [time1Config, setTime1Config] = useState({ minuteStep: 1, disabledHours: [], defaultValue: null, showFooter: false, persianNumbers: false });
+  const [time1Config, setTime1Config] = useState({ minuteStep: 1, disabledHours: [], defaultValue: null, showFooter: false, persianNumbers: false, isRange: false });
+  
+  const [timelineConfig, setTimelineConfig] = useState({ direction: 'vertical', markerShape: 'circular', showIcons: true, alternating: true, persianNumbers: false, markerSize: 32 });
+  const [timelineEvents] = useState([
+  {
+    "id": 1,
+    "date": "2024-01-15",
+    "time": "09:00",
+    "title": "آغاز پروژه",
+    "description": "جلسه اولیه تیم و برنامه‌ریزی پروژه",
+    "color": "#10b981",
+    "icon": "🎯"
+  },
+  {
+    "id": 2,
+    "date": "2024-02-20",
+    "title": "اتمام مرحله طراحی",
+    "description": "طرح‌های رابط کاربری و تجربه کاربری تأیید و آماده برای توسعه شدند",
+    "color": "#6366f1",
+    "image": "https://via.placeholder.com/40x40/6366f1/ffffff?text=UI  "
+  },
+  {
+    "id": 3,
+    "date": "2024-03-30",
+    "time": "16:00",
+    "title": "انتشار نسخه بتا",
+    "description": "اولین نسخه بتا به تیم آزمایش تحویل داده شد",
+    "color": "#f59e0b",
+    "icon": "🚀"
+  },
+  {
+    "id": 4,
+    "date": "2024-04-15",
+    "title": "آزمایش توسط کاربران",
+    "description": "آزمایش جامع توسط کاربران و جمع‌آوری بازخوردها",
+    "color": "#ef4444",
+    "icon": "👥"
+  },
+  {
+    "id": 5,
+    "date": "2024-05-01",
+    "time": "10:00",
+    "title": "انتشار نهایی",
+    "description": "راه‌اندازی در محیط تولید و اعلام رسمی انتشار",
+    "color": "#8b5cf6",
+    "icon": "🎉"
+  }
+]);
   const [time1Internal, setTime1Internal] = useState('');
 
   const tabs = [
     { id: 'datetime', label: 'DateTime Picker', icon: '' },
     { id: 'range', label: 'Range Picker', icon: '' },
     { id: 'timepicker', label: 'Time Picker', icon: '' },
-    { id: 'calendar', label: 'Calendar', icon: '' }
+    { id: 'calendar', label: 'Calendar', icon: '' },
+    { id: 'timeline', label: 'Timeline', icon: '' }
   ];
 
   const presetColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -102,7 +151,7 @@ function MyComponent() {
       return `import { PersianTimePicker } from 'persian-calendar-suite';
 
 function MyComponent() {
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState(${time1Config.isRange ? '[]' : "''"});
 
   return (
     <PersianTimePicker
@@ -112,12 +161,50 @@ function MyComponent() {
       ${time1Config.defaultValue ? `defaultValue="${time1Config.defaultValue}"` : ''}
       ${time1Config.disabledHours.length > 0 ? `disabledHours={${JSON.stringify(time1Config.disabledHours)}}` : ''}
       persianNumbers={${time1Config.persianNumbers}}
+      isRange={${time1Config.isRange}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
         textColor: '${globalTheme.textColor}',
         borderColor: '${globalTheme.borderColor}',
         hoverColor: '${globalTheme.hoverColor}'
+      }}
+    />
+  );
+}`;
+    } else if (activeTab === 'timeline') {
+      return `import { PersianTimeline } from 'persian-calendar-suite';
+
+function MyComponent() {
+  const [events] = useState([
+    {
+      id: 1,
+      date: '2024-01-15',
+      time: '09:00',
+      title: 'Project Kickoff',
+      description: 'Initial team meeting and project planning session',
+      color: '#10b981',
+      icon: '🎯'
+    }
+  ]);
+
+  return (
+    <PersianTimeline
+      events={events}
+      direction="${timelineConfig.direction}"
+      markerShape="${timelineConfig.markerShape}"
+      showIcons={${timelineConfig.showIcons}}
+      alternating={${timelineConfig.alternating}}
+      persianNumbers={${timelineConfig.persianNumbers}}
+      onEventClick={(event) => console.log(event)}
+      theme={{
+        primaryColor: '${globalTheme.primaryColor}',
+        backgroundColor: '${globalTheme.backgroundColor}',
+        textColor: '${globalTheme.textColor}',
+        borderColor: '${globalTheme.borderColor}',
+        lineColor: '${globalTheme.borderColor}',
+        markerSize: '${timelineConfig.markerSize}px',
+        eventRadius: '12px'
       }}
     />
   );
@@ -211,27 +298,27 @@ function MyComponent() {
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
               <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Date Range Picker</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dual calendar range picker with min/max date restrictions and Persian display.</p>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dual calendar range picker with min/max date restrictions and mobile responsive design.</p>
             </div>
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
-              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Standalone Time Picker</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dedicated time selector with manual typing, defaults, and disabled hours.</p>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Time & Time Range Picker</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Dedicated time selector with range mode, manual typing, defaults, and disabled hours.</p>
             </div>
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
               <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Full Calendar</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Event management with recurring, all-day, multi-day events and smooth animations.</p>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Event management with recurring, all-day, multi-day events, overlap detection, and animations.</p>
             </div>
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
-              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Advanced Features</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Event tooltips, read-only events, overlap detection, and Persian date formats.</p>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Persian Timeline</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Chronological event visualization with Persian dates, icons, and customizable layouts.</p>
             </div>
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
-              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Theme Customization</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Complete theme control with colors, borders, and circular dates.</p>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Theme & Mobile Support</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Complete theme control with colors, borders, circular dates, and full mobile responsiveness.</p>
             </div>
           </div>
         </div>
@@ -766,11 +853,16 @@ function MyComponent() {
                 <input type="checkbox" checked={time1Config.persianNumbers} onChange={(e) => setTime1Config({...time1Config, persianNumbers: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 Persian Numbers
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={time1Config.isRange} onChange={(e) => { setTime1Config({...time1Config, isRange: e.target.checked}); setTime1Internal(e.target.checked ? [] : ''); setTime1(e.target.checked ? [] : ''); }} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Time Range
+              </label>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
               <PersianTimePicker
+                key={`time-${time1Config.isRange}`}
                 value={time1Internal}
                 onChange={(val) => {
                   setTime1Internal(val);
@@ -781,13 +873,14 @@ function MyComponent() {
                 defaultValue={time1Config.defaultValue}
                 disabledHours={time1Config.disabledHours}
                 persianNumbers={time1Config.persianNumbers}
+                isRange={time1Config.isRange}
               />
             </div>
 
             <div style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', border: '2px solid #e5e7eb', marginBottom: '20px' }}>
               <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Output Value:</div>
               <div style={{ fontSize: '15px', fontFamily: 'monospace', color: '#1f2937', wordBreak: 'break-all' }}>
-                {time1 || <span style={{ color: '#9ca3af' }}>No time selected</span>}
+                {time1 ? (time1Config.isRange ? JSON.stringify(time1) : time1) : <span style={{ color: '#9ca3af' }}>No time selected</span>}
               </div>
             </div>
 
@@ -835,6 +928,132 @@ function MyComponent() {
               Complete calendar with event management, day/week/month views, and overlap detection
             </p>
             <CalendarDemo theme={globalTheme} codeExample={getCodeExample()} />
+          </div>
+        )}
+
+        {/* Timeline Tab */}
+        {activeTab === 'timeline' && (
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', animation: 'slideIn 0.5s ease-out' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
+               Timeline
+            </h2>
+            <p style={{ margin: '0 0 24px 0', color: '#6b7280', fontSize: '14px' }}>
+              Chronological event visualization with Persian dates and customizable markers
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Direction</label>
+                <select 
+                  value={timelineConfig.direction} 
+                  onChange={(e) => setTimelineConfig({...timelineConfig, direction: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value="vertical">Vertical</option>
+                  <option value="horizontal">Horizontal</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Marker Shape</label>
+                <select 
+                  value={timelineConfig.markerShape} 
+                  onChange={(e) => setTimelineConfig({...timelineConfig, markerShape: e.target.value})} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value="circular">Circular</option>
+                  <option value="rect">Rectangle</option>
+                </select>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={timelineConfig.showIcons} onChange={(e) => setTimelineConfig({...timelineConfig, showIcons: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Show Icons
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={timelineConfig.alternating} onChange={(e) => setTimelineConfig({...timelineConfig, alternating: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Alternating Layout
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={timelineConfig.persianNumbers} onChange={(e) => setTimelineConfig({...timelineConfig, persianNumbers: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Persian Numbers
+              </label>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>اندازه نشانگر</label>
+                <input 
+                  type="range" 
+                  min="20" 
+                  max="60" 
+                  value={timelineConfig.markerSize} 
+                  onChange={(e) => setTimelineConfig({...timelineConfig, markerSize: parseInt(e.target.value)})} 
+                  style={{ width: '100%', cursor: 'pointer', accentColor: '#6366f1' }}
+                />
+                <div style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>{timelineConfig.markerSize}px</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#6b7280' }}>Interactive Demo</label>
+              <div style={{ border: '2px solid #e5e7eb', borderRadius: '12px', padding: '20px', background: '#fafafa' }}>
+                <PersianTimeline
+                  key={`timeline-${timelineConfig.markerSize}-${timelineConfig.direction}-${timelineConfig.markerShape}`}
+                  events={timelineEvents}
+                  direction={timelineConfig.direction}
+                  markerShape={timelineConfig.markerShape}
+                  showIcons={timelineConfig.showIcons}
+                  alternating={timelineConfig.direction === 'vertical' ? timelineConfig.alternating : false}
+                  persianNumbers={timelineConfig.persianNumbers}
+                  onEventClick={(event) => { console.log('Timeline event clicked:', event); console.log('Passing markerSize:', timelineConfig.markerSize); }}
+                  theme={{
+                    primaryColor: globalTheme.primaryColor,
+                    backgroundColor: globalTheme.backgroundColor,
+                    textColor: globalTheme.textColor,
+                    borderColor: globalTheme.borderColor,
+                    lineColor: globalTheme.borderColor,
+                    markerSize: `${timelineConfig.markerSize}px`,
+                    eventRadius: '12px',
+                    shadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', border: '2px solid #e5e7eb', marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Event Data:</div>
+              <div style={{ fontSize: '13px', fontFamily: 'monospace', color: '#1f2937', maxHeight: '120px', overflowY: 'auto' }}>
+                {JSON.stringify(timelineEvents, null, 2)}
+              </div>
+            </div>
+
+            <div style={{ position: 'relative', padding: '16px', background: '#1e1e1e', borderRadius: '12px', border: '1px solid #333' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#4ec9b0' }}>Code Example</div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(getCodeExample());
+                    const btn = event.target;
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => btn.textContent = ' Copy', 2000);
+                  }}
+                  style={{
+                    padding: '6px 12px',
+                    background: '#2d2d2d',
+                    color: '#d4d4d4',
+                    border: '1px solid #444',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3e'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#2d2d2d'}
+                >
+                   Copy
+                </button>
+              </div>
+              <pre style={{ margin: 0, color: '#d4d4d4', fontSize: '13px', lineHeight: '1.6', overflowX: 'auto', fontFamily: '"Consolas", "Monaco", "Courier New", monospace' }}>
+                <code>{getCodeExample()}</code>
+              </pre>
+            </div>
           </div>
         )}
 
