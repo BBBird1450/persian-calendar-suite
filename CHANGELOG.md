@@ -2,7 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2024-12-13
+## [1.5.0] - 2025-12-19
+
+### Added
+
+- PersianMoment utility for Jalali date arithmetic and conversions
+- Support for multiple input formats (Jalali, Gregorian, ISO)
+- Date difference calculations with Persian text output
+- Format conversion between different calendar systems
+- Persian number display in date calculations
+- RTL calendar layout with proper weekday header direction
+- Flexible output formatting with day names, month names, and combinations
+- Persian "قبل" (ago) format for negative date differences
+- 13 Jalali format options (basic, Persian digits, full dates with day names)
+- 4 Gregorian format options (basic, full dates with day names)
+- 4 difference output formats (number, Persian digits, Persian text, English text)
+- Disabled hours support in PersianCalendar for time slot restrictions
+- Visual indicators for disabled time slots in day view
+- Persian holiday integration via Time.ir API for all calendar components
+- `usePersianHolidays` React hook for fetching Persian holidays
+- Holiday display with red highlighting and special styling
+- Holiday events are read-only and clickable for details
+- `showHolidays` prop for all calendar components (default: false)
+- RTL calendar layout enabled by default for all components
+- Holiday details modal with proper Persian styling instead of browser alerts
+- Comprehensive mobile responsiveness for all calendar components
+- Mobile-optimized event calendar with compact cells and smaller fonts
+- Mobile-friendly holiday modal with full-width layout
+- Responsive weekday headers and navigation buttons for mobile
+- Mobile-optimized date range picker with stacked layout
+
+### Fixed
+
+- Navigation arrows now work correctly in RTL layout (reversed direction)
+- Holiday date format conversion from Jalali to Gregorian
+- Month navigation arrows in PersianDateTimePicker, PersianDateRangePicker, and PersianCalendar
+- Mobile month view layout with proper cell heights and event sizing
+- Holiday modal replaces browser alerts with professional UI
+- RTL calendar positioning in PersianDateRangePicker
+- Mobile responsiveness issues in calendar headers and buttons
+- Event text truncation and sizing on mobile devices
+
+
+## [1.2.0] - 2025-12-13
 
 ### Added
 - PersianTimeline component for chronological event visualization
@@ -23,15 +65,18 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Scroll inside PersianDateRangePicker no longer closes the dropdown
-- PersianDateRangePicker layout issues on mobile devices
+- Timeline layout issues on mobile devices (both vertical and horizontal)
 - Event card sizing and spacing optimized for mobile screens
+- RTL calendar weekday headers now use LTR direction for proper alignment
+- React 19 compatibility added to peer dependencies
+- Disabled hours are now visually indicated in calendar day view with grayed out appearance
 
-## [1.1.6] - 2024-12-13
+## [1.1.6] - 2025-12-13
 
 ### Fixed
 - Added React import to PersianCalendar and PersianDateRangePicker to fix "React is not defined" errors
 
-## [1.1.5] - 2024-12-13
+## [1.1.5] - 2025-12-13
 
 ### Added
 - "Now" button in PersianTimePicker to quickly set current time
@@ -40,26 +85,26 @@ All notable changes to this project will be documented in this file.
 - RTL calendar layout support for DateTimePicker and DateRangePicker
 - Improved checkbox styling in demo with hover effects and accent colors
 
-## [1.1.4] - 2024-12-13
+## [1.1.4] - 2025-12-13
 
 ### Added
 - Persian number display option (`persianNumbers` prop) for showing digits in Persian format
 - RTL calendar layout option (`rtlCalendar` prop) to start weekdays from right (Saturday first)
 - Added PersianTimePicker component documentation in README
 
-## [1.1.3] - 2024-12-13
+## [1.1.3] - 2025-12-13
 
 ### Fixed
 - Fixed scroll inside picker closing the dropdown
 - Updated input styling
 - Improved input appearance with proper border radius and padding
 
-## [1.1.2] - 2024-12-13
+## [1.1.2] - 2025-12-13
 
 ### Fixed
 - Added React import to fix "React is not defined" error in external projects
 
-## [1.1.1] - 2024-12-13
+## [1.1.1] - 2025-12-13
 
 ### Fixed
 - Output format changes now update immediately in demo
@@ -67,7 +112,7 @@ All notable changes to this project will be documented in this file.
 - Touch-friendly sizing with larger targets (36px) and fonts (16px) on mobile
 - Time picker switches to vertical layout on mobile devices
 
-## [1.1.0] - 2024-12-13
+## [1.1.0] - 2025-12-13
 
 ### Added
 - PersianTimePicker component as standalone time selector
@@ -85,7 +130,7 @@ All notable changes to this project will be documented in this file.
 - Added day name (like "سه شنبه") to day view header
 - Swapped navigation button placement (بعدی left, قبلی right)
 
-## [1.0.4] - 2024-12-12
+## [1.0.4] - 2025-12-12
 
 ### Added
 - Recurring events (daily, weekly, monthly, yearly)
@@ -94,7 +139,7 @@ All notable changes to this project will be documented in this file.
 - Today button for quick navigation
 - Event tooltips on hover with details
 
-## [1.0.3] - 2024-12-12
+## [1.0.3] - 2025-12-12
 
 ### Fixed
 - Show time in datepicker input when showTime is enabled

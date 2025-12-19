@@ -1,6 +1,6 @@
 {
   "name": "persian-calendar-suite",
-  "version": "1.2.1",
+  "version": "1.5.0",
   "description": "Complete Persian (Jalali/Shamsi) calendar suite for React with datepicker, range picker, time range picker, event calendar, and timeline",
   "type": "module",
   "main": "dist/index.js",
@@ -29,6 +29,8 @@
     "jalali-calendar",
     "shamsi-calendar",
     "timeline",
+    "convert-dates",
+    "date-arithmetic",
     "iran",
     "farsi",
     "nextjs",

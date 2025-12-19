@@ -5,6 +5,7 @@ import PersianDateRangePicker from '../src/PersianDateRangePicker.jsx';
 import PersianTimePicker from '../src/PersianTimePicker.jsx';
 import PersianTimeline from '../src/PersianTimeline.jsx';
 import CalendarDemo from './CalendarDemo.jsx';
+import persianMoment from '../src/PersianMoment.js';
 
 function App() {
   const [activeTab, setActiveTab] = useState('datetime');
@@ -19,11 +20,11 @@ function App() {
   });
   
   const [dt1, setDt1] = useState(null);
-  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: false });
+  const [dt1Config, setDt1Config] = useState({ outputFormat: 'iso', showFooter: true, showTime: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: true, showHolidays: false });
   const [dt1Internal, setDt1Internal] = useState(null);
   
   const [range1, setRange1] = useState(null);
-  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: false });
+  const [range1Config, setRange1Config] = useState({ outputFormat: 'iso', showFooter: true, minDate: null, maxDate: null, persianNumbers: false, rtlCalendar: true, showHolidays: false });
   const [range1Internal, setRange1Internal] = useState(null);
   
   const [time1, setTime1] = useState('');
@@ -33,7 +34,7 @@ function App() {
   const [timelineEvents] = useState([
   {
     "id": 1,
-    "date": "2024-01-15",
+    "date": "2025-01-15",
     "time": "09:00",
     "title": "آغاز پروژه",
     "description": "جلسه اولیه تیم و برنامه‌ریزی پروژه",
@@ -42,7 +43,7 @@ function App() {
   },
   {
     "id": 2,
-    "date": "2024-02-20",
+    "date": "2025-02-20",
     "title": "اتمام مرحله طراحی",
     "description": "طرح‌های رابط کاربری و تجربه کاربری تأیید و آماده برای توسعه شدند",
     "color": "#6366f1",
@@ -50,7 +51,7 @@ function App() {
   },
   {
     "id": 3,
-    "date": "2024-03-30",
+    "date": "2025-03-30",
     "time": "16:00",
     "title": "انتشار نسخه بتا",
     "description": "اولین نسخه بتا به تیم آزمایش تحویل داده شد",
@@ -59,7 +60,7 @@ function App() {
   },
   {
     "id": 4,
-    "date": "2024-04-15",
+    "date": "2025-04-15",
     "title": "آزمایش توسط کاربران",
     "description": "آزمایش جامع توسط کاربران و جمع‌آوری بازخوردها",
     "color": "#ef4444",
@@ -67,7 +68,7 @@ function App() {
   },
   {
     "id": 5,
-    "date": "2024-05-01",
+    "date": "2025-05-01",
     "time": "10:00",
     "title": "انتشار نهایی",
     "description": "راه‌اندازی در محیط تولید و اعلام رسمی انتشار",
@@ -76,13 +77,23 @@ function App() {
   }
 ]);
   const [time1Internal, setTime1Internal] = useState('');
+  
+  const [momentInput1, setMomentInput1] = useState('1404/01/02');
+  const [momentInput2, setMomentInput2] = useState('1403/12/30');
+
+  const [momentDiffUnit, setMomentDiffUnit] = useState('auto');
+  const [momentOutputFormat, setMomentOutputFormat] = useState('number');
+  const [momentInputFormat, setMomentInputFormat] = useState('jYYYY/jMM/jDD');
+  const [momentResult, setMomentResult] = useState('');
+  const [momentOperation, setMomentOperation] = useState('diff');
 
   const tabs = [
     { id: 'datetime', label: 'DateTime Picker', icon: '' },
     { id: 'range', label: 'Range Picker', icon: '' },
     { id: 'timepicker', label: 'Time Picker', icon: '' },
     { id: 'calendar', label: 'Calendar', icon: '' },
-    { id: 'timeline', label: 'Timeline', icon: '' }
+    { id: 'timeline', label: 'Timeline', icon: '' },
+    { id: 'moment', label: 'Persian Moment', icon: '' }
   ];
 
   const presetColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -107,6 +118,7 @@ function MyComponent() {
       outputFormat="${dt1Config.outputFormat}"
       persianNumbers={${dt1Config.persianNumbers}}
       rtlCalendar={${dt1Config.rtlCalendar}}
+      showHolidays={${dt1Config.showHolidays}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -135,6 +147,7 @@ function MyComponent() {
       ${range1Config.maxDate ? `maxDate="${range1Config.maxDate}"` : ''}
       persianNumbers={${range1Config.persianNumbers}}
       rtlCalendar={${range1Config.rtlCalendar}}
+      showHolidays={${range1Config.showHolidays}}
       theme={{
         primaryColor: '${globalTheme.primaryColor}',
         backgroundColor: '${globalTheme.backgroundColor}',
@@ -179,7 +192,7 @@ function MyComponent() {
   const [events] = useState([
     {
       id: 1,
-      date: '2024-01-15',
+      date: '2025-01-15',
       time: '09:00',
       title: 'Project Kickoff',
       description: 'Initial team meeting and project planning session',
@@ -209,6 +222,17 @@ function MyComponent() {
     />
   );
 }`;
+    } else if (activeTab === 'moment') {
+      return `import persianMoment from 'persian-calendar-suite/PersianMoment';
+
+// Create Persian dates
+const m1 = persianMoment('${momentInput1}', '${momentInputFormat}');
+${momentOperation === 'diff' ? `const m2 = persianMoment('${momentInput2}', '${momentInputFormat}');
+
+// Calculate differences
+console.log(m2.diff(m1, '${momentDiffUnit}', '${momentOutputFormat}')); // ${momentResult}` : `
+// Convert format
+console.log(m1.format('${momentOutputFormat}')); // ${momentResult}`}`;
     } else {
       return `import { PersianCalendar } from 'persian-calendar-suite';
 
@@ -317,8 +341,8 @@ function MyComponent() {
             </div>
             
             <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '12px', textAlign: 'left' }}>
-              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Theme & Mobile Support</h3>
-              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Complete theme control with colors, borders, circular dates, and full mobile responsiveness.</p>
+              <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '700' }}>Persian Moment Utility</h3>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.9, lineHeight: '1.5' }}>Date arithmetic with 17 output formats, Persian text differences, and Jalali/Gregorian conversions.</p>
             </div>
           </div>
         </div>
@@ -580,6 +604,10 @@ function MyComponent() {
                 <input type="checkbox" checked={dt1Config.rtlCalendar} onChange={(e) => setDt1Config({...dt1Config, rtlCalendar: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 RTL Calendar
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={dt1Config.showHolidays} onChange={(e) => setDt1Config({...dt1Config, showHolidays: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Show Holidays
+              </label>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Output Format</label>
                 <select 
@@ -631,6 +659,7 @@ function MyComponent() {
                 maxDate={dt1Config.maxDate}
                 persianNumbers={dt1Config.persianNumbers}
                 rtlCalendar={dt1Config.rtlCalendar}
+                showHolidays={dt1Config.showHolidays}
               />
             </div>
 
@@ -702,6 +731,10 @@ function MyComponent() {
                 <input type="checkbox" checked={range1Config.rtlCalendar} onChange={(e) => setRange1Config({...range1Config, rtlCalendar: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
                 RTL Calendar
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                <input type="checkbox" checked={range1Config.showHolidays} onChange={(e) => setRange1Config({...range1Config, showHolidays: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#6366f1' }} />
+                Show Holidays
+              </label>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Output Format</label>
                 <select 
@@ -752,6 +785,7 @@ function MyComponent() {
                 maxDate={range1Config.maxDate}
                 persianNumbers={range1Config.persianNumbers}
                 rtlCalendar={range1Config.rtlCalendar}
+                showHolidays={range1Config.showHolidays}
               />
             </div>
 
@@ -1053,6 +1087,223 @@ function MyComponent() {
               <pre style={{ margin: 0, color: '#d4d4d4', fontSize: '13px', lineHeight: '1.6', overflowX: 'auto', fontFamily: '"Consolas", "Monaco", "Courier New", monospace' }}>
                 <code>{getCodeExample()}</code>
               </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Persian Moment Tab */}
+        {activeTab === 'moment' && (
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', animation: 'slideIn 0.5s ease-out' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>
+               Persian Moment
+            </h2>
+            <p style={{ margin: '0 0 24px 0', color: '#6b7280', fontSize: '14px' }}>
+              Jalali date arithmetic utility with diff, add, and format methods
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px', padding: '20px', background: '#f9fafb', borderRadius: '12px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Operation</label>
+                <select 
+                  value={momentOperation} 
+                  onChange={(e) => setMomentOperation(e.target.value)} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value="diff">Calculate Difference</option>
+                  <option value="convert">Convert Format</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Input Format</label>
+                <select 
+                  value={momentInputFormat} 
+                  onChange={(e) => setMomentInputFormat(e.target.value)} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  <option value="jYYYY/jMM/jDD">Jalali (jYYYY/jMM/jDD)</option>
+                  <option value="YYYY/MM/DD">Gregorian (YYYY/MM/DD)</option>
+                  <option value="iso">ISO (YYYY-MM-DD)</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Date 1 ({momentInputFormat})</label>
+                <input 
+                  type="text" 
+                  value={momentInput1} 
+                  onChange={(e) => setMomentInput1(e.target.value)} 
+                  placeholder={momentInputFormat === 'iso' ? '2025-03-20' : momentInputFormat}
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                />
+              </div>
+              {momentOperation === 'diff' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Date 2 ({momentInputFormat})</label>
+                  <input 
+                    type="text" 
+                    value={momentInput2} 
+                    onChange={(e) => setMomentInput2(e.target.value)} 
+                    placeholder={momentInputFormat === 'iso' ? '2025-03-22' : momentInputFormat}
+                    style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white' }}
+                  />
+                </div>
+              )}
+              {momentOperation === 'diff' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Diff Unit</label>
+                  <select 
+                    value={momentDiffUnit} 
+                    onChange={(e) => setMomentDiffUnit(e.target.value)} 
+                    style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                  >
+                    <option value="auto">Auto (Smart)</option>
+                    <option value="day">day</option>
+                    <option value="jDay">jDay</option>
+                    <option value="jMonth">jMonth</option>
+                    <option value="jYear">jYear</option>
+                  </select>
+                </div>
+              )}
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Output Format</label>
+                <select 
+                  value={momentOutputFormat} 
+                  onChange={(e) => setMomentOutputFormat(e.target.value)} 
+                  style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', background: 'white' }}
+                >
+                  {momentOperation === 'diff' ? (
+                    <>
+                      <option value="number">Number (5)</option>
+                      <option value="persian">Persian (۵)</option>
+                      <option value="persian-text">Persian Text (۵ روز)</option>
+                      <option value="english-text">English Text (5 days)</option>
+                    </>
+                  ) : (
+                    <>
+                      <optgroup label="Jalali Formats">
+                        <option value="jYYYY/jMM/jDD">Basic (1404/09/20)</option>
+                        <option value="persian-numbers">Persian Digits (۱۴۰۳/۰۹/۲۰)</option>
+                        <option value="jDD jMMMM jYYYY">Day Month Year (۲۰ آذر ۱۴۰۳)</option>
+                        <option value="jDDDD jDD jMMMM jYYYY">Full Date (جمعه ۲۰ آذر ۱۴۰۳)</option>
+                        <option value="jDDDD jDD jMMM">Day Date Month (جمعه ۲۰ آذر)</option>
+                        <option value="jDD jMMMM">Day Month (۲۰ آذر)</option>
+                        <option value="jMMMM jYYYY">Month Year (آذر ۱۴۰۳)</option>
+                        <option value="jDDDD">Day Name (جمعه)</option>
+                        <option value="jMMMM">Month Name (آذر)</option>
+                      </optgroup>
+                      <optgroup label="Gregorian Formats">
+                        <option value="YYYY/MM/DD">Basic (2025/12/10)</option>
+                        <option value="DD MMMM YYYY">Day Month Year (10 December 2025)</option>
+                        <option value="DDDD DD MMMM YYYY">Full Date (Friday 10 December 2025)</option>
+                        <option value="iso">ISO (2025-12-10T00:00:00.000Z)</option>
+                      </optgroup>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div>
+                <button 
+                  onClick={() => {
+                    try {
+                      const format = momentInputFormat === 'iso' ? undefined : momentInputFormat;
+                      const m1 = persianMoment(momentInput1, format);
+                      
+                      if (momentOperation === 'diff') {
+                        const m2 = persianMoment(momentInput2, format);
+                        const diff = m2.diff(m1, momentDiffUnit, momentOutputFormat);
+                        setMomentResult(`${diff}`);
+                      } else {
+                        const converted = m1.format(momentOutputFormat);
+                        setMomentResult(`${converted}`);
+                      }
+                    } catch (e) {
+                      setMomentResult('Error: ' + e.message);
+                    }
+                  }}
+                  style={{ padding: '8px 16px', border: 'none', borderRadius: '8px', background: globalTheme.primaryColor, color: globalTheme.selectedTextColor, cursor: 'pointer', fontSize: '14px', fontWeight: '600', marginTop: '22px' }}
+                >
+                  {momentOperation === 'diff' ? 'Calculate' : 'Convert'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', border: '2px solid #e5e7eb', marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Result:</div>
+              <div style={{ fontSize: '15px', fontFamily: 'monospace', color: '#1f2937', wordBreak: 'break-all' }}>
+                {momentResult || <span style={{ color: '#9ca3af' }}>Click Calculate to see results</span>}
+              </div>
+            </div>
+
+            <div style={{ position: 'relative', padding: '16px', background: '#1e1e1e', borderRadius: '12px', border: '1px solid #333' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#4ec9b0' }}>Code Example</div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(getCodeExample());
+                    const btn = event.target;
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => btn.textContent = ' Copy', 2000);
+                  }}
+                  style={{
+                    padding: '6px 12px',
+                    background: '#2d2d2d',
+                    color: '#d4d4d4',
+                    border: '1px solid #444',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3e'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#2d2d2d'}
+                >
+                   Copy
+                </button>
+              </div>
+              <pre style={{ margin: 0, color: '#d4d4d4', fontSize: '13px', lineHeight: '1.6', overflowX: 'auto', fontFamily: '"Consolas", "Monaco", "Courier New", monospace' }}>
+                <code>{getCodeExample()}</code>
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Persian Moment Format Guide */}
+        {activeTab === 'moment' && (
+          <div style={{ marginTop: '20px', padding: '16px', background: '#f0f9ff', borderRadius: '12px', border: '2px solid #0ea5e9' }}>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1', marginBottom: '12px' }}>Available Format Options</div>
+            <div style={{ display: 'grid', gap: '12px', fontSize: '13px' }}>
+              <div>
+                <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '4px' }}>Jalali Formats:</div>
+                <div style={{ color: '#64748b', lineHeight: '1.5' }}>
+                  • jYYYY/jMM/jDD - Basic format<br/>
+                  • persian-numbers - Persian digits<br/>
+                  • jDD jMMMM jYYYY - Day month year<br/>
+                  • jDDDD jDD jMMMM jYYYY - Full date with day name<br/>
+                  • jDDDD jDD jMMM - Day date month<br/>
+                  • jDD jMMMM - Day month only<br/>
+                  • jMMMM jYYYY - Month year only<br/>
+                  • jDDDD - Day name only<br/>
+                  • jMMMM - Month name only
+                </div>
+              </div>
+              <div>
+                <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '4px' }}>Gregorian Formats:</div>
+                <div style={{ color: '#64748b', lineHeight: '1.5' }}>
+                  • YYYY/MM/DD - Basic format<br/>
+                  • DD MMMM YYYY - Day month year<br/>
+                  • DDDD DD MMMM YYYY - Full date with day name<br/>
+                  • iso - ISO format
+                </div>
+              </div>
+              <div>
+                <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '4px' }}>Difference Formats:</div>
+                <div style={{ color: '#64748b', lineHeight: '1.5' }}>
+                  • number - Plain number<br/>
+                  • persian - Persian digits<br/>
+                  • persian-text - Persian with unit name<br/>
+                  • english-text - English with unit name
+                </div>
+              </div>
             </div>
           </div>
         )}

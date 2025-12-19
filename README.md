@@ -18,6 +18,7 @@ A comprehensive Persian (Jalali/Shamsi) calendar suite for React with datepicker
   - [PersianTimePicker](#persiantimepicker)
   - [PersianCalendar](#persiancalendar)
   - [PersianTimeline](#persiantimeline)
+  - [PersianMoment](#persianmoment)
 - [Theme Customization](#theme-customization)
 - [Output Formats](#output-formats)
 - [Programmatic Control](#programmatic-control)
@@ -203,7 +204,7 @@ const [range, setRange] = useState(null);
 
 ### PersianTimePicker
 
-Standalone time picker component.
+Standalone time picker component with range support.
 
 #### Import
 
@@ -226,8 +227,8 @@ const [time, setTime] = useState('');
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `value` | `string` | `''` | Selected time value (HH:MM) |
-| `onChange` | `(value: string) => void` | - | Callback when time changes |
+| `value` | `string \| string[]` | `''` | Selected time value (HH:MM or [HH:MM, HH:MM] for range) |
+| `onChange` | `(value: string \| string[]) => void` | - | Callback when time changes |
 | `defaultValue` | `string \| 'now'` | `null` | Default time ('now' or 'HH:MM') |
 | `minuteStep` | `number` | `1` | Minute step interval |
 | `disabledHours` | `number[]` | `[]` | Array of disabled hours |
@@ -283,7 +284,7 @@ import { PersianTimeline } from 'persian-calendar-suite';
 const [events] = useState([
   {
     id: 1,
-    date: '2024-12-10',
+    date: '2025-12-10',
     time: '14:30',
     title: 'Project Started',
     description: 'Initial project setup and planning',
@@ -292,7 +293,7 @@ const [events] = useState([
   },
   {
     id: 2,
-    date: '2024-12-15',
+    date: '2025-12-15',
     title: 'Milestone Reached',
     color: '#6366f1',
     image: '/milestone.jpg'
@@ -367,7 +368,7 @@ const [events] = useState([
 const timelineEvents = [
   {
     id: 1,
-    date: '2024-01-15',
+    date: '2025-01-15',
     time: '09:00',
     title: 'Project Kickoff',
     description: 'Initial team meeting and project planning session',
@@ -376,7 +377,7 @@ const timelineEvents = [
   },
   {
     id: 2,
-    date: '2024-02-20',
+    date: '2025-02-20',
     title: 'Design Phase Complete',
     description: 'UI/UX designs approved and ready for development',
     color: '#6366f1',
@@ -384,7 +385,7 @@ const timelineEvents = [
   },
   {
     id: 3,
-    date: '2024-03-30',
+    date: '2025-03-30',
     time: '16:00',
     title: 'Beta Release',
     description: 'First beta version released to testing team',
@@ -409,6 +410,59 @@ const timelineEvents = [
     eventRadius: '12px'
   }}
 />
+```
+
+---
+
+### PersianMoment
+
+Jalali date arithmetic utility for date calculations and conversions.
+
+#### Import
+
+```jsx
+import persianMoment from 'persian-calendar-suite/PersianMoment';
+```
+
+#### Basic Usage
+
+```jsx
+// Create Persian dates
+const m1 = persianMoment('1404/12/30', 'jYYYY/jMM/jDD');
+const m2 = persianMoment('1404/01/02', 'jYYYY/jMM/jDD');
+
+// Calculate differences
+console.log(m2.diff(m1, 'day')); // 3
+console.log(m2.diff(m1, 'jMonth')); // 1
+
+// Format conversion
+console.log(m1.format('YYYY/MM/DD')); // 2025/03/19
+console.log(m1.format('jYYYY/jMM/jDD')); // 1404/12/30
+```
+
+#### Supported Input Formats
+
+- **Jalali**: `'1404/12/30'` with format `'jYYYY/jMM/jDD'`
+- **Gregorian**: `'2025/03/19'` with format `'YYYY/MM/DD'`
+- **ISO**: `'2025-03-19'` (no format needed)
+
+#### Methods
+
+**diff(other, unit, outputFormat)**
+- `unit`: `'day'`, `'jDay'`, `'jMonth'`, `'jYear'`
+- `outputFormat`: `'number'`, `'persian'`, `'persian-text'`
+
+**format(format)**
+- `format`: `'jYYYY/jMM/jDD'`, `'YYYY/MM/DD'`, `'iso'`
+
+#### Output Formats
+
+```jsx
+const diff = m2.diff(m1, 'day', 'persian-text');
+// Output: "۳ روز"
+
+const diff2 = m2.diff(m1, 'jMonth', 'persian');
+// Output: "۱"
 ```
 
 ---
@@ -449,6 +503,7 @@ const [events, setEvents] = useState([]);
 | `editable` | `boolean` | `true` | Enable event creation/editing |
 | `showWeekends` | `boolean` | `true` | Show weekend days |
 | `headerFormat` | `'full' \| 'short'` | `'full'` | Header format |
+| `disabledHours` | `number[]` | `[]` | Array of disabled hours (0-23) |
 | `theme` | `ThemeObject` | `{}` | Theme customization |
 
 #### Event Object
@@ -524,7 +579,7 @@ Click on any existing event to open the edit modal:
 const [events, setEvents] = useState([
   {
     id: 1,
-    date: '2024-12-10',
+    date: '2025-12-10',
     startTime: '09:00',
     endTime: '10:00',
     title: 'Team Meeting',
@@ -535,7 +590,7 @@ const [events, setEvents] = useState([
   },
   {
     id: 2,
-    date: '2024-12-11',
+    date: '2025-12-11',
     title: 'Company Event',
     color: '#ef4444',
     isAllDay: true
@@ -564,6 +619,7 @@ const [events, setEvents] = useState([
   theme={{
     primaryColor: '#6366f1'
   }}
+  disabledHours={[0, 1, 2, 22, 23]} // Disable late night/early morning hours
 />
 ```
 
@@ -612,17 +668,17 @@ const customTheme = {
 
 ### ISO 8601 (default)
 ```
-2024-12-10T14:30:00
+2025-12-10T14:30:00
 ```
 
 ### Shamsi
 ```
-1403/09/20 14:30
+1404/09/20 14:30
 ```
 
 ### Gregorian
 ```
-2024/12/10 14:30
+2025/12/10 14:30
 ```
 
 ### Hijri
@@ -673,7 +729,7 @@ const [date, setDate] = useState(null);
 setDate(new Date().toISOString());
 
 // Set specific date (ISO format)
-setDate('2024-12-10T14:30:00');
+setDate('2025-12-10T14:30:00');
 
 // Set via timestamp
 setDate(1702217400000);
@@ -688,7 +744,7 @@ setDate(null);
 const [range, setRange] = useState(null);
 
 // Set range
-setRange(['2024-12-01T00:00:00', '2024-12-31T23:59:59']);
+setRange(['2025-12-01T00:00:00', '2025-12-31T23:59:59']);
 
 // Set last 7 days
 const end = new Date();
@@ -708,7 +764,7 @@ const [events, setEvents] = useState([]);
 const addEvent = () => {
   const newEvent = {
     id: Date.now(),
-    date: '2024-12-15',
+    date: '2025-12-15',
     startTime: '10:00',
     endTime: '11:00',
     title: 'New Meeting',
@@ -756,14 +812,14 @@ useEffect(() => {
 
 ```jsx
 const [events, setEvents] = useState([...]);
-const [selectedDate, setSelectedDate] = useState('2024-12-10');
+const [selectedDate, setSelectedDate] = useState('2025-12-10');
 
 // Get events for specific date
 const todayEvents = events.filter(e => e.date === selectedDate);
 
 // Get events in date range
 const rangeEvents = events.filter(e => 
-  e.date >= '2024-12-01' && e.date <= '2024-12-31'
+  e.date >= '2025-12-01' && e.date <= '2025-12-31'
 );
 ```
 
@@ -853,7 +909,7 @@ function App() {
   return (
     <div>
       <button onClick={addQuickEvent}>Add Event</button>
-      <button onClick={() => jumpToDate('2024-12-25')}>Jump to Dec 25</button>
+      <button onClick={() => jumpToDate('2025-12-25')}>Jump to Dec 25</button>
       <button onClick={exportEvents}>Export</button>
       
       <PersianCalendar
@@ -896,8 +952,8 @@ function App() {
 <PersianDateTimePicker
   value={value}
   onChange={setValue}
-  minDate="2024-01-01"
-  maxDate="2024-12-31"
+  minDate="2025-01-01"
+  maxDate="2025-12-31"
 />
 ```
 
@@ -975,6 +1031,23 @@ All components are fully responsive and optimized for mobile devices:
 - Edge (latest)
 - Opera (latest)
 - Mobile browsers (iOS Safari, Chrome Mobile, Samsung Internet)
+
+## Persian Holiday Integration
+
+All calendar components support Persian holiday integration via the Time.ir API:
+
+```jsx
+<PersianDateTimePicker showHolidays={true} />
+<PersianDateRangePicker showHolidays={true} />
+<PersianCalendar showHolidays={true} />
+```
+
+### Holiday Features
+- **Automatic Loading**: Holidays load automatically for the current month
+- **Visual Highlighting**: Holiday dates appear with red background
+- **Read-Only**: Holidays cannot be edited or deleted
+- **Clickable**: Click holidays to see details
+- **API Integration**: Uses Time.ir Persian calendar API with CORS proxy
 
 ## License
 

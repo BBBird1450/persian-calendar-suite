@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { usePersianHolidays } from './hooks/usePersianHolidays.js';
 
 const PERSIAN_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 const PERSIAN_WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
@@ -21,7 +22,8 @@ export default function PersianDateTimePicker({
   minDate = null,
   maxDate = null,
   persianNumbers = false,
-  rtlCalendar = false
+  rtlCalendar = true,
+  showHolidays = false
 }) {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -45,19 +47,38 @@ export default function PersianDateTimePicker({
   const [selectedDay, setSelectedDay] = useState(null);
   const [timeStr, setTimeStr] = useState("00:00");
   const [showCalendar, setShowCalendar] = useState(false);
-  const [displayMonth, setDisplayMonth] = useState({ year: 1403, month: 9 });
+  const [displayMonth, setDisplayMonth] = useState({ year: 1404, month: 9 });
   const [today, setToday] = useState(null);
   const [viewMode, setViewMode] = useState('day');
   const [yearPage, setYearPage] = useState(0);
   const wrapperRef = useRef(null);
   const [isClosing, setIsClosing] = useState(false);
-
+  
+  // Fetch holidays for current month
+  const { holidays } = usePersianHolidays(
+    showHolidays ? displayMonth.year : null, 
+    showHolidays ? displayMonth.month : null
+  );
   useEffect(() => {
     const todayDate = new Date();
     const jToday = gregorianToJalali(todayDate.getFullYear(), todayDate.getMonth() + 1, todayDate.getDate());
     setToday({ year: jToday.jy, month: jToday.jm, day: jToday.jd });
     setDisplayMonth({ year: jToday.jy, month: jToday.jm });
   }, []);
+
+  const isHoliday = (year, month, day) => {
+    if (!showHolidays) return false;
+    
+    // Check API holidays first
+    const gDate = jalaliToGregorian(year, month, day);
+    const dateStr = `${gDate.gy}-${String(gDate.gm).padStart(2, '0')}-${String(gDate.gd).padStart(2, '0')}`;
+    const apiHoliday = holidays.find(h => h.date.startsWith(dateStr));
+    if (apiHoliday) return true;
+    
+    // Fallback to Friday check
+    const jsDate = new Date(gDate.gy, gDate.gm - 1, gDate.gd);
+    return jsDate.getDay() === 5;
+  };
   
   useEffect(() => {
     if (value) {
@@ -260,15 +281,15 @@ export default function PersianDateTimePicker({
             cursor: isDisabled ? 'not-allowed' : 'pointer',
             borderRadius: defaultTheme.circularDates ? '50%' : '4px',
             border: `1px solid ${defaultTheme.borderColor}`,
-            backgroundColor: isSelected ? defaultTheme.primaryColor : isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent',
-            color: isDisabled ? '#ccc' : isSelected ? defaultTheme.selectedTextColor : defaultTheme.textColor,
+            backgroundColor: isSelected ? defaultTheme.primaryColor : isToday ? lightenColor(defaultTheme.primaryColor, 80) : isHoliday(displayMonth.year, displayMonth.month, day) ? '#ffebee' : 'transparent',
+            color: isDisabled ? '#ccc' : isSelected ? defaultTheme.selectedTextColor : isHoliday(displayMonth.year, displayMonth.month, day) ? '#d32f2f' : defaultTheme.textColor,
             fontWeight: isSelected ? 'bold' : 'normal',
             fontSize: window.innerWidth <= 768 ? '16px' : '14px',
             transition: 'all 0.2s',
             opacity: isDisabled ? 0.3 : 1
           }}
           onMouseEnter={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = defaultTheme.hoverColor)}
-          onMouseLeave={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = isToday ? lightenColor(defaultTheme.primaryColor, 80) : 'transparent')}
+          onMouseLeave={(e) => !isSelected && !isDisabled && (e.target.style.backgroundColor = isToday ? lightenColor(defaultTheme.primaryColor, 80) : isHoliday(displayMonth.year, displayMonth.month, day) ? '#ffebee' : 'transparent')}
         >
           {persianNumbers ? toPersianDigits(day) : day}
         </div>
@@ -450,7 +471,7 @@ export default function PersianDateTimePicker({
           `}</style>
             <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
-              {viewMode === 'day' && <button onClick={() => changeMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
+              {viewMode === 'day' && <button onClick={() => changeMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
               {viewMode !== 'day' && <div style={{ width: '32px' }} />}
               <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
                 <button onClick={() => setViewMode('month')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
@@ -460,13 +481,13 @@ export default function PersianDateTimePicker({
                   {displayMonth.year}
                 </button>
               </div>
-              {viewMode === 'day' && <button onClick={() => changeMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
+              {viewMode === 'day' && <button onClick={() => changeMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
               {viewMode !== 'day' && <div style={{ width: '32px' }} />}
             </div>
             <div style={{ animation: 'slideIn 0.2s ease-in-out' }}>
             {viewMode === 'day' && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px', direction: rtlCalendar ? 'ltr' : '' }}>
                   {(rtlCalendar ? PERSIAN_WEEKDAYS_RTL : PERSIAN_WEEKDAYS).map(day => (
                     <div key={day} style={{ width: window.innerWidth <= 768 ? '36px' : '32px', height: window.innerWidth <= 768 ? '36px' : '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                       {day}

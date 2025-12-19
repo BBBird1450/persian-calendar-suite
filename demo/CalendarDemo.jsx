@@ -22,7 +22,11 @@ function CalendarDemo({ theme, codeExample }) {
   const [calendarConfig, setCalendarConfig] = useState({
     initialView: 'day',
     editable: true,
-    headerFormat: 'full'
+    headerFormat: 'full',
+    disabledHours: [],
+    showHolidays: true,
+    rtlCalendar: true,
+    persianNumbers: true
   });
 
   const [eventLog, setEventLog] = useState([]);
@@ -154,6 +158,19 @@ function CalendarDemo({ theme, codeExample }) {
               <option value="short">Short Names</option>
             </select>
           </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Disabled Hours</label>
+            <select 
+              multiple
+              value={calendarConfig.disabledHours.map(String)}
+              onChange={(e) => setCalendarConfig({...calendarConfig, disabledHours: Array.from(e.target.selectedOptions, option => parseInt(option.value))})} 
+              style={{ width: '100%', padding: '8px 12px', border: '2px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', background: 'white', minHeight: '80px' }}
+            >
+              {Array.from({length: 24}, (_, i) => (
+                <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+              ))}
+            </select>
+          </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
             <input 
               type="checkbox" 
@@ -162,6 +179,15 @@ function CalendarDemo({ theme, codeExample }) {
               style={{ width: '18px', height: '18px', cursor: 'pointer' }}
             />
             Editable
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+            <input 
+              type="checkbox" 
+              checked={calendarConfig.showHolidays} 
+              onChange={(e) => setCalendarConfig({...calendarConfig, showHolidays: e.target.checked})} 
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            Show Persian Holidays
           </label>
         </div>
       </div>
@@ -179,6 +205,7 @@ function CalendarDemo({ theme, codeExample }) {
               <li><strong>Create:</strong> Click time slots (day/week) or days (month) to open event modal</li>
               <li><strong>Edit:</strong> Click existing events to modify title, time, color, description</li>
               <li><strong>Delete:</strong> Use delete button in event modal</li>
+              <li><strong>Holidays:</strong> Click Persian holidays to view details in modal</li>
               <li><strong>Callbacks:</strong> onEventCreate, onEventUpdate, onEventDelete props</li>
             </ul>
           </div>
@@ -238,6 +265,7 @@ function CalendarDemo({ theme, codeExample }) {
         }}
         theme={theme}
         {...calendarConfig}
+        disabledHours={calendarConfig.disabledHours}
       />
 
       {/* Callback Output */}

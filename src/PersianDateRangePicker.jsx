@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { usePersianHolidays } from './hooks/usePersianHolidays.js';
 
 const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
 const toPersianDigits = (str) => str.toString().replace(/\d/g, (digit) => PERSIAN_DIGITS[parseInt(digit)]);
@@ -13,7 +14,8 @@ const PersianDateRangePicker = ({
   outputFormat = 'iso',
   showFooter = true,
   persianNumbers = false,
-  rtlCalendar = false
+  rtlCalendar = true,
+  showHolidays = false
 }) => {
   const defaultTheme = {
     primaryColor: '#1890ff',
@@ -50,6 +52,16 @@ const PersianDateRangePicker = ({
   const [leftYearPage, setLeftYearPage] = useState(0);
   const [rightYearPage, setRightYearPage] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
+  
+  // Fetch holidays for both months
+  const { holidays: leftHolidays } = usePersianHolidays(
+    showHolidays ? leftYear : null, 
+    showHolidays ? leftMonth : null
+  );
+  const { holidays: rightHolidays } = usePersianHolidays(
+    showHolidays ? rightYear : null, 
+    showHolidays ? rightMonth : null
+  );
 
   useEffect(() => {
     if (value && Array.isArray(value) && value[0] && typeof value[0] === 'string' && value[0].includes('-')) {
@@ -61,9 +73,12 @@ const PersianDateRangePicker = ({
   useEffect(() => {
     const now = new Date();
     const jalali = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    
+    // Left calendar shows current month (earlier)
     setLeftMonth(jalali.month);
     setLeftYear(jalali.year);
     
+    // Right calendar shows next month (later)
     let nextMonth = jalali.month + 1;
     let nextYear = jalali.year;
     if (nextMonth > 12) {
@@ -73,6 +88,23 @@ const PersianDateRangePicker = ({
     setRightMonth(nextMonth);
     setRightYear(nextYear);
   }, []);
+
+  const isHoliday = (year, month, day) => {
+    if (!showHolidays) return false;
+    
+    // Check API holidays first
+    const gDate = jalaliToGregorian(year, month, day);
+    const dateStr = `${gDate.year}-${String(gDate.month).padStart(2, '0')}-${String(gDate.day).padStart(2, '0')}`;
+    
+    // Check both left and right month holidays
+    const allHolidays = [...(leftHolidays || []), ...(rightHolidays || [])];
+    const apiHoliday = allHolidays.find(h => h.date.startsWith(dateStr));
+    if (apiHoliday) return true;
+    
+    // Fallback to Friday check
+    const jsDate = new Date(gDate.year, gDate.month - 1, gDate.day);
+    return jsDate.getDay() === 5;
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -311,6 +343,7 @@ const PersianDateRangePicker = ({
       const isInRange = isDateInRange(year, month, day);
       const isStart = isDateStart(year, month, day);
       const isEnd = isDateEnd(year, month, day);
+      const isHol = isHoliday(year, month, day);
       
       const isMobile = window.innerWidth <= 768;
       const dayStyle = {
@@ -322,7 +355,7 @@ const PersianDateRangePicker = ({
         cursor: 'pointer',
         border: `1px solid ${defaultTheme.borderColor}`,
         fontSize: isMobile ? '14px' : '14px',
-        color: defaultTheme.textColor,
+        color: isHol && !isStart && !isEnd ? '#d32f2f' : defaultTheme.textColor,
         transition: 'all 0.2s'
       };
 
@@ -335,6 +368,7 @@ const PersianDateRangePicker = ({
         dayStyle.backgroundColor = lightenColor(defaultTheme.primaryColor, 80);
         dayStyle.borderRadius = defaultTheme.circularDates ? '50%' : '4px';
       } else {
+        dayStyle.backgroundColor = isHol ? '#ffebee' : 'transparent';
         dayStyle.borderRadius = defaultTheme.circularDates ? '50%' : '4px';
       }
 
@@ -519,26 +553,26 @@ const PersianDateRangePicker = ({
               .range-weekday { width: 30px !important; height: 30px !important; font-size: 10px !important; }
             }
           `}</style>
-          <div className="range-calendars" style={{ display: 'flex', gap: window.innerWidth <= 768 ? '8px' : '16px' }}>
+          <div className="range-calendars" style={{ display: 'flex', gap: window.innerWidth <= 768 ? '8px' : '16px', direction: 'rtl' }}>
             <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
-                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
+                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
                 <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
-                  <button onClick={() => setLeftViewMode('month')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
-                    {persianMonths[leftMonth - 1]}
-                  </button>
                   <button onClick={() => setLeftViewMode('year')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
                     {leftYear}
                   </button>
+                  <button onClick={() => setLeftViewMode('month')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
+                    {persianMonths[leftMonth - 1]}
+                  </button>
                 </div>
-                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
+                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
               <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>
               {leftViewMode === 'day' && (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px', direction: rtlCalendar ? 'ltr' : '' }}>
                     {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
                       <div className="range-weekday" key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
@@ -557,23 +591,23 @@ const PersianDateRangePicker = ({
 
             <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
-                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
+                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
                 <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
-                  <button onClick={() => setRightViewMode('month')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
-                    {persianMonths[rightMonth - 1]}
-                  </button>
                   <button onClick={() => setRightViewMode('year')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
                     {rightYear}
                   </button>
+                  <button onClick={() => setRightViewMode('month')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
+                    {persianMonths[rightMonth - 1]}
+                  </button>
                 </div>
-                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
+                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
               <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>
               {rightViewMode === 'day' && (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px', direction: rtlCalendar ? 'ltr' : '' }}>
                     {(rtlCalendar ? weekDaysRTL : weekDays).map(day => (
                       <div className="range-weekday" key={day} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', color: defaultTheme.textColor }}>
                         {day}
