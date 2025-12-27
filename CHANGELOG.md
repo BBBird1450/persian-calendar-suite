@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.2] - 2025-12-27
+
+### Added
+
+- 4-column layout for time range picker (از-ساعت, از-دقیقه, تا-ساعت, تا-دقیقه)
+- Persian digits in calendar navigation text
+- Holiday integration in PersianDateRangePicker via Time.ir API
+
+### Fixed
+
+- RTL layout issues in all calendar components
+- Navigation arrows now work correctly (reversed for RTL)
+- Week view time column moved to right side
+- Day view time labels moved to right side
+- Week view days now properly ordered right-to-left
+- Week view now shows correct days for current week calculation
+- Weekday headers reversed to match RTL layout
+- Date range picker navigation arrows fixed
+- Time.ir API calls now always use CORS proxy (removed direct calls)
+
 ## [1.5.0] - 2025-12-19
 
 ### Added

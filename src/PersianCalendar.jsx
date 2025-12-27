@@ -3,6 +3,9 @@ import PersianDateTimePicker from './PersianDateTimePicker.jsx';
 import PersianTimePicker from './PersianTimePicker.jsx';
 import { usePersianHolidays } from './hooks/usePersianHolidays.js';
 
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+const toPersianDigits = (str) => str.toString().replace(/\d/g, (digit) => PERSIAN_DIGITS[parseInt(digit)]);
+
 const PersianCalendar = ({ 
   events = [],
   onEventClick,
@@ -48,7 +51,7 @@ const PersianCalendar = ({
   const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
   const weekDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
   const weekDaysShort = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-  const displayWeekDays = headerFormat === 'short' ? weekDaysShort : weekDays;
+  const displayWeekDays = headerFormat === 'short' ? weekDaysShort.reverse() : weekDays.reverse();
   const filteredWeekDays = showWeekends ? displayWeekDays : displayWeekDays.slice(0, 5);
   const gridCols = showWeekends ? 7 : 5;
 
@@ -64,6 +67,12 @@ const PersianCalendar = ({
   useEffect(() => {
     const jalali = gregorianToJalali(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
     setDisplayMonth({ year: jalali.jy, month: jalali.jm });
+    setCurrentDay(jalali.jd);
+    
+    // Calculate current week based on current day
+    const firstDay = getFirstDayOfMonth(jalali.jy, jalali.jm);
+    const weekNum = Math.floor((jalali.jd + firstDay - 1) / 7);
+    setCurrentWeek(weekNum);
   }, [currentDate]);
 
 
@@ -291,11 +300,11 @@ const PersianCalendar = ({
       const greg = jalaliToGregorian(displayMonth.year, displayMonth.month, currentDay);
       const date = new Date(greg.gy, greg.gm - 1, greg.gd);
       const dayOfWeek = (date.getDay() + 1) % 7;
-      return `${weekDays[dayOfWeek]} ${currentDay} ${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
+      return `${weekDays[dayOfWeek]} ${toPersianDigits(currentDay)} ${persianMonths[displayMonth.month - 1]} ${toPersianDigits(displayMonth.year)}`;
     } else if (viewMode === 'week') {
-      return `هفته ${currentWeek + 1} از ${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
+      return `هفته ${toPersianDigits(currentWeek + 1)} از ${persianMonths[displayMonth.month - 1]} ${toPersianDigits(displayMonth.year)}`;
     }
-    return `${persianMonths[displayMonth.month - 1]} ${displayMonth.year}`;
+    return `${persianMonths[displayMonth.month - 1]} ${toPersianDigits(displayMonth.year)}`;
   };
 
   const handleNavigation = (delta) => {
@@ -372,7 +381,7 @@ const PersianCalendar = ({
     }
 
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridCols}, 1fr)`, gap: '0', animation: 'fadeIn 0.3s ease-in-out' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridCols}, 1fr)`, gap: '0', animation: 'fadeIn 0.3s ease-in-out', direction: 'rtl' }}>
         {days}
       </div>
     );
@@ -381,35 +390,36 @@ const PersianCalendar = ({
   const renderWeekView = () => {
     const firstDay = getFirstDayOfMonth(displayMonth.year, displayMonth.month);
     const daysInMonth = getDaysInMonth(displayMonth.year, displayMonth.month);
+    
+    // Calculate the actual week days for current week
     const weekStartDay = Math.max(1, (currentWeek * 7) - firstDay + 1);
     const weekEndDay = Math.min(daysInMonth, weekStartDay + 6);
     const hours = Array.from({ length: 24 }, (_, i) => i);
     
     const weekDays = [];
-    for (let d = weekStartDay; d <= weekEndDay; d++) {
+    for (let d = weekEndDay; d >= weekStartDay; d--) {
       weekDays.push(d);
     }
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: `60px repeat(${weekDays.length}, 1fr)`, borderBottom: `2px solid ${defaultTheme.borderColor}` }}>
-          <div style={{ padding: '8px', background: defaultTheme.headerBg }} />
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${weekDays.length}, 1fr) 60px`, borderBottom: `2px solid ${defaultTheme.borderColor}` }}>
           {weekDays.map((day) => {
             const greg = jalaliToGregorian(displayMonth.year, displayMonth.month, day);
             const date = new Date(greg.gy, greg.gm - 1, greg.gd);
             const dayOfWeek = (date.getDay() + 1) % 7;
             return (
               <div key={day} className="calendar-weekday-header" style={{ padding: isMobile ? '6px 2px' : '8px', textAlign: 'center', background: defaultTheme.headerBg, borderLeft: `1px solid ${defaultTheme.borderColor}`, fontSize: isMobile ? '10px' : '14px' }}>
-                <div style={{ fontWeight: 'bold', fontSize: isMobile ? '10px' : '14px' }}>{filteredWeekDays[dayOfWeek]}</div>
+                <div style={{ fontWeight: 'bold', fontSize: isMobile ? '10px' : '14px' }}>{['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'][dayOfWeek]}</div>
                 <div style={{ fontSize: isMobile ? '9px' : '12px', color: '#999' }}>{day}</div>
               </div>
             );
           })}
+          <div style={{ padding: '8px', background: defaultTheme.headerBg }} />
         </div>
         <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
           {hours.map(hour => (
-            <div key={hour} style={{ display: 'grid', gridTemplateColumns: `60px repeat(${weekDays.length}, 1fr)`, borderBottom: `1px solid ${defaultTheme.borderColor}` }}>
-              <div style={{ padding: '8px', fontSize: '12px', color: '#999', textAlign: 'right', background: defaultTheme.headerBg }}>{String(hour).padStart(2, '0')}:00</div>
+            <div key={hour} style={{ display: 'grid', gridTemplateColumns: `repeat(${weekDays.length}, 1fr) 60px`, borderBottom: `1px solid ${defaultTheme.borderColor}` }}>
               {weekDays.map((day) => {
                 const dayEvents = getEventsForDate(displayMonth.year, displayMonth.month, day).filter(e => {
                   if (!e.time && !e.startTime) return false;
@@ -418,7 +428,7 @@ const PersianCalendar = ({
                 });
 
                 return (
-                  <div key={day} style={{ padding: '4px', minHeight: '50px', borderLeft: `1px solid ${defaultTheme.borderColor}`, cursor: editable ? 'pointer' : 'default' }} onClick={() => handleSlotClick(displayMonth.year, displayMonth.month, day, hour)}>
+                  <div key={day} style={{ padding: '4px', minHeight: '50px', borderRight: `1px solid ${defaultTheme.borderColor}`, cursor: editable ? 'pointer' : 'default' }} onClick={() => handleSlotClick(displayMonth.year, displayMonth.month, day, hour)}>
                     {dayEvents.map((event, i) => (
                       <div
                         key={i}
@@ -452,6 +462,7 @@ const PersianCalendar = ({
                   </div>
                 );
               })}
+              <div style={{ padding: '8px', fontSize: '12px', color: '#999', textAlign: 'center', background: defaultTheme.headerBg }}>{String(hour).padStart(2, '0')}:00</div>
             </div>
           ))}
         </div>
@@ -470,8 +481,8 @@ const PersianCalendar = ({
           const isDisabled = disabledHours.includes(hour);
 
           return (
-            <div key={hour} style={{ display: 'flex', borderBottom: `1px solid ${defaultTheme.borderColor}`, minHeight: '80px', background: isDisabled ? '#f5f5f5' : hasOverlap ? '#fff7e6' : 'transparent', opacity: isDisabled ? 0.6 : 1 }}>
-              <div style={{ width: '80px', padding: '8px', fontSize: '14px', color: '#999', textAlign: 'right', borderLeft: `1px solid ${defaultTheme.borderColor}`, background: defaultTheme.headerBg }}>
+            <div key={hour} style={{ display: 'flex', borderBottom: `1px solid ${defaultTheme.borderColor}`, minHeight: '80px', background: isDisabled ? '#f5f5f5' : hasOverlap ? '#fff7e6' : 'transparent', opacity: isDisabled ? 0.6 : 1, direction: 'rtl' }}>
+              <div style={{ width: '80px', padding: '8px', fontSize: '14px', color: '#999', textAlign: 'center', borderLeft: `1px solid ${defaultTheme.borderColor}`, background: defaultTheme.headerBg }}>
                 {String(hour).padStart(2, '0')}:00
               </div>
               <div 
@@ -556,15 +567,19 @@ const PersianCalendar = ({
       `}</style>
       <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '12px' : '20px', background: defaultTheme.headerBg, borderBottom: `2px solid ${defaultTheme.borderColor}` }}>
         <div className="calendar-nav-buttons" style={{ display: 'flex', gap: isMobile ? '4px' : '8px' }}>
-          <button onClick={() => handleNavigation(-1)} style={{ padding: isMobile ? '6px 12px' : '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: isMobile ? '12px' : '14px' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>بعدی</button>
+          <button onClick={() => handleNavigation(1)} style={{ padding: isMobile ? '6px 12px' : '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: isMobile ? '12px' : '14px' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>بعدی</button>
           <button onClick={() => {
             const today = new Date();
             const jalali = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
             setDisplayMonth({ year: jalali.jy, month: jalali.jm });
             setCurrentDay(jalali.jd);
-            setCurrentWeek(0);
+            
+            // Calculate current week based on today
+            const firstDay = getFirstDayOfMonth(jalali.jy, jalali.jm);
+            const weekNum = Math.floor((jalali.jd + firstDay - 1) / 7);
+            setCurrentWeek(weekNum);
           }} style={{ padding: isMobile ? '6px 12px' : '8px 16px', border: `1px solid ${defaultTheme.primaryColor}`, borderRadius: '6px', background: defaultTheme.primaryColor, color: '#fff', cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: isMobile ? '12px' : '14px' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>امروز</button>
-          <button onClick={() => handleNavigation(1)} style={{ padding: isMobile ? '6px 12px' : '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: isMobile ? '12px' : '14px' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>قبلی</button>
+          <button onClick={() => handleNavigation(-1)} style={{ padding: isMobile ? '6px 12px' : '8px 16px', border: `1px solid ${defaultTheme.borderColor}`, borderRadius: '6px', background: defaultTheme.backgroundColor, cursor: 'pointer', transition: 'all 0.2s', fontWeight: '500', fontSize: isMobile ? '12px' : '14px' }} onMouseEnter={(e) => e.currentTarget.style.background = defaultTheme.primaryColor + '15'} onMouseLeave={(e) => e.currentTarget.style.background = defaultTheme.backgroundColor}>قبلی</button>
         </div>
         <div className="calendar-title" style={{ fontWeight: 'bold', fontSize: isMobile ? '16px' : '20px', color: defaultTheme.textColor, direction: 'rtl', textAlign: 'center' }}>
           {getNavigationText()}

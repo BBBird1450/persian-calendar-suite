@@ -16,17 +16,7 @@ export const fetchPersianCalendarEvents = async (year, month, day = 0) => {
   const originalUrl = `https://api.time.ir/v1/event/fa/events/calendar?year=${year}&month=${month}&day=${day}&base1=0&base2=1&base3=2`;
   
   try {
-    // Try direct request first
-    const response = await fetch(originalUrl);
-    if (response.ok) {
-      return await response.json();
-    }
-  } catch (error) {
-    console.warn('Direct API call failed, trying proxy:', error.message);
-  }
-  
-  try {
-    // Fallback to AllOrigins proxy
+    // Use AllOrigins proxy
     const proxyUrl = `${FALLBACK_URL}${encodeURIComponent(originalUrl)}`;
     const response = await fetch(proxyUrl);
     
@@ -44,7 +34,7 @@ export const fetchPersianCalendarEvents = async (year, month, day = 0) => {
       .replace(/&#39;/g, "'");
     return JSON.parse(decodedContent);
   } catch (error) {
-    console.error('All API attempts failed:', error);
+    // console.error('API call failed:', error);
     throw error;
   }
 };

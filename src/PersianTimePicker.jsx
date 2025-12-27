@@ -171,76 +171,143 @@ const PersianTimePicker = ({
           overflow: 'hidden'
         }}>
           <div style={{ display: 'flex', height: '200px' }}>
-            <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
-              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{isRange ? (selectingStart ? 'از - ساعت' : 'تا - ساعت') : 'ساعت'}</span>
-                {!isRange && <button onClick={() => {
-                  const now = new Date();
-                  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                  setSelectedHour(now.getHours());
-                  setSelectedMinute(now.getMinutes());
-                  onChange?.(currentTime);
-                  setShowDropdown(false);
-                }} style={{ padding: '2px 6px', fontSize: '9px', border: 'none', background: defaultTheme.primaryColor, color: '#fff', borderRadius: '3px', cursor: 'pointer' }}>الان</button>}
-              </div>
-              {hours.map(hour => {
-                const isSelected = isRange 
-                  ? (selectingStart ? startHour === hour : endHour === hour)
-                  : selectedHour === hour;
-                return (
-                  <div
-                    key={hour}
-                    onClick={() => handleTimeSelect(hour, isRange ? (selectingStart ? startMinute : endMinute) : selectedMinute)}
-                    style={{
-                      padding: '4px 8px',
-                      cursor: 'pointer',
-                      background: isSelected ? defaultTheme.primaryColor : 'transparent',
-                      color: isSelected ? '#fff' : defaultTheme.textColor,
-                      textAlign: 'center',
-                      fontSize: '12px'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = defaultTheme.hoverColor;
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    {persianNumbers ? toPersianDigits(String(hour).padStart(2, '0')) : String(hour).padStart(2, '0')}
+            {isRange ? (
+              <>
+                <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>از - ساعت</div>
+                  {hours.map(hour => (
+                    <div
+                      key={hour}
+                      onClick={() => { setStartHour(hour); }}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: startHour === hour ? defaultTheme.primaryColor : 'transparent',
+                        color: startHour === hour ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(hour).padStart(2, '0')) : String(hour).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>از - دقیقه</div>
+                  {minutes.map(minute => (
+                    <div
+                      key={minute}
+                      onClick={() => { setStartMinute(minute); }}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: startMinute === minute ? defaultTheme.primaryColor : 'transparent',
+                        color: startMinute === minute ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(minute).padStart(2, '0')) : String(minute).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>تا - ساعت</div>
+                  {hours.map(hour => (
+                    <div
+                      key={hour}
+                      onClick={() => { setEndHour(hour); }}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: endHour === hour ? defaultTheme.primaryColor : 'transparent',
+                        color: endHour === hour ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(hour).padStart(2, '0')) : String(hour).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>تا - دقیقه</div>
+                  {minutes.map(minute => (
+                    <div
+                      key={minute}
+                      onClick={() => {
+                        setEndMinute(minute);
+                        const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+                        const endTime = `${String(endHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                        onChange?.([startTime, endTime]);
+                        setShowDropdown(false);
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: endMinute === minute ? defaultTheme.primaryColor : 'transparent',
+                        color: endMinute === minute ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(minute).padStart(2, '0')) : String(minute).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ flex: 1, overflowY: 'auto', borderRight: `1px solid ${defaultTheme.borderColor}` }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>ساعت</span>
+                    <button onClick={() => {
+                      const now = new Date();
+                      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                      setSelectedHour(now.getHours());
+                      setSelectedMinute(now.getMinutes());
+                      onChange?.(currentTime);
+                      setShowDropdown(false);
+                    }} style={{ padding: '2px 6px', fontSize: '9px', border: 'none', background: defaultTheme.primaryColor, color: '#fff', borderRadius: '3px', cursor: 'pointer' }}>الان</button>
                   </div>
-                );
-              })}
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-              <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>{isRange ? (selectingStart ? 'از - دقیقه' : 'تا - دقیقه') : 'دقیقه'}</div>
-              {minutes.map(minute => {
-                const isSelected = isRange 
-                  ? (selectingStart ? startMinute === minute : endMinute === minute)
-                  : selectedMinute === minute;
-                return (
-                  <div
-                    key={minute}
-                    onClick={() => handleTimeSelect(isRange ? (selectingStart ? startHour : endHour) : selectedHour, minute)}
-                    style={{
-                      padding: '4px 8px',
-                      cursor: 'pointer',
-                      background: isSelected ? defaultTheme.primaryColor : 'transparent',
-                      color: isSelected ? '#fff' : defaultTheme.textColor,
-                      textAlign: 'center',
-                      fontSize: '12px'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = defaultTheme.hoverColor;
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) e.currentTarget.style.background = 'transparent';
-                    }}
-                  >
-                    {persianNumbers ? toPersianDigits(String(minute).padStart(2, '0')) : String(minute).padStart(2, '0')}
-                  </div>
-                );
-              })}
-            </div>
+                  {hours.map(hour => (
+                    <div
+                      key={hour}
+                      onClick={() => handleTimeSelect(hour, selectedMinute)}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: selectedHour === hour ? defaultTheme.primaryColor : 'transparent',
+                        color: selectedHour === hour ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(hour).padStart(2, '0')) : String(hour).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  <div style={{ padding: '4px', background: '#f5f5f5', textAlign: 'center', fontSize: '11px', fontWeight: 'bold' }}>دقیقه</div>
+                  {minutes.map(minute => (
+                    <div
+                      key={minute}
+                      onClick={() => handleTimeSelect(selectedHour, minute)}
+                      style={{
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                        background: selectedMinute === minute ? defaultTheme.primaryColor : 'transparent',
+                        color: selectedMinute === minute ? '#fff' : defaultTheme.textColor,
+                        textAlign: 'center',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {persianNumbers ? toPersianDigits(String(minute).padStart(2, '0')) : String(minute).padStart(2, '0')}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

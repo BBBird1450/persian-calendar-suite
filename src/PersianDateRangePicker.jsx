@@ -556,7 +556,7 @@ const PersianDateRangePicker = ({
           <div className="range-calendars" style={{ display: 'flex', gap: window.innerWidth <= 768 ? '8px' : '16px', direction: 'rtl' }}>
             <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
-                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
+                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
                 <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
                   <button onClick={() => setLeftViewMode('year')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
@@ -566,7 +566,7 @@ const PersianDateRangePicker = ({
                     {persianMonths[leftMonth - 1]}
                   </button>
                 </div>
-                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
+                {leftViewMode === 'day' && <button onClick={() => changeLeftMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {leftViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
               <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>
@@ -591,7 +591,7 @@ const PersianDateRangePicker = ({
 
             <div className="range-calendar" style={{ minWidth: window.innerWidth <= 768 ? '240px' : '300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '8px' }}>
-                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
+                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>«</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
                 <div style={{ display: 'flex', gap: '8px', flex: 1, justifyContent: 'center' }}>
                   <button onClick={() => setRightViewMode('year')} style={{ padding: '4px 8px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', color: defaultTheme.textColor, fontWeight: 'bold', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.target.style.color = defaultTheme.primaryColor; e.target.style.textDecoration = 'underline'; }} onMouseLeave={(e) => { e.target.style.color = defaultTheme.textColor; e.target.style.textDecoration = 'none'; }}>
@@ -601,7 +601,7 @@ const PersianDateRangePicker = ({
                     {persianMonths[rightMonth - 1]}
                   </button>
                 </div>
-                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(-1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
+                {rightViewMode === 'day' && <button onClick={() => changeRightMonth(1)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px', padding: '4px 8px', color: defaultTheme.primaryColor }}>»</button>}
                 {rightViewMode !== 'day' && <div style={{ width: '32px' }} />}
               </div>
               <div style={{ animation: 'slideIn 0.2s ease-in-out', maxHeight: '350px', overflowY: 'auto' }}>

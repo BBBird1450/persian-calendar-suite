@@ -72,7 +72,7 @@ export default function PersianDateTimePicker({
     // Check API holidays first
     const gDate = jalaliToGregorian(year, month, day);
     const dateStr = `${gDate.gy}-${String(gDate.gm).padStart(2, '0')}-${String(gDate.gd).padStart(2, '0')}`;
-    const apiHoliday = holidays.find(h => h.date.startsWith(dateStr));
+    const apiHoliday = holidays?.find(h => h.date.startsWith(dateStr));
     if (apiHoliday) return true;
     
     // Fallback to Friday check
